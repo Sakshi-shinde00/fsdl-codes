@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2330;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --blue: #58a6ff;
+      --orange: #f0883e;
+      --green: #3fb950;
+      --purple: #bc8cff;
+      --red: #f85149;
+      --yellow: #d29922;
+      --font: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 4rem;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-weight: 700; font-size: 1rem;
+    }
+    .nav-logo .icon { font-size: 1.3rem; }
+    .nav-right { display: flex; gap: 1rem; align-items: center; }
+    .city-badge {
+      font-size: 0.78rem; font-weight: 600;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      color: var(--blue);
+    }
+    .update-time { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a2332 0%, #0d1b2a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem;
+    }
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .hero-left .city { font-size: 1.8rem; font-weight: 800; }
+    .hero-left .date { font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem; }
+    .hero-temp {
+      font-size: 5rem; font-weight: 800; color: var(--blue);
+      line-height: 1; letter-spacing: -2px;
+    }
+    .hero-temp span { font-size: 2rem; font-weight: 400; color: var(--muted); }
+    .hero-desc { font-size: 1rem; color: var(--text); margin-top: 0.4rem; }
+    .hero-stats {
+      display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem;
+    }
+    .hero-stat .hs-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .hero-stat .hs-val   { font-size: 0.95rem; font-weight: 600; margin-top: 2px; }
+
+    /* ── MAIN CONTENT ── */
+    .content { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── SECTION TITLE ── */
+    .sec-title {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .sec-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── DAY CARDS (quick view) ── */
+    .day-cards {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .day-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+    }
+    .day-card:hover { border-color: var(--blue); background: var(--surface2); }
+    .day-card.today { border-color: var(--blue); background: rgba(88,166,255,0.08); }
+    .day-card .dc-day  { font-size: 0.68rem; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    .day-card .dc-icon { font-size: 1.6rem; margin: 0.35rem 0; }
+    .day-card .dc-hi   { font-size: 0.95rem; font-weight: 700; color: var(--orange); }
+    .day-card .dc-lo   { font-size: 0.75rem; color: var(--muted); }
+    .day-card .dc-pcp  { font-size: 0.65rem; color: var(--blue); margin-top: 0.2rem; }
+
+    /* ── CHARTS GRID ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .chart-full { grid-column: span 2; }
+
+    /* ── CHART CARD ── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      overflow: hidden;
+    }
+    .chart-card-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 1.25rem;
+      flex-wrap: wrap; gap: 0.5rem;
+    }
+    .chart-card-title  { font-size: 0.9rem; font-weight: 700; }
+    .chart-card-sub    { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .chart-legend {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .cl-item {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .cl-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    canvas { display: block; width: 100% !important; }
+
+    /* ── PIE ROW ── */
+    .pie-wrap {
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .pie-canvas-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+    .pie-center {
+      position: absolute; top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      text-align: center; pointer-events: none;
+    }
+    .pie-center .pc-val { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+    .pie-center .pc-lbl { font-size: 0.62rem; color: var(--muted); font-weight: 500; }
+    .pie-legend { flex: 1; display: flex; flex-direction: column; gap: 0.55rem; }
+    .pie-leg-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      cursor: pointer; padding: 0.3rem 0;
+      border-radius: 6px; transition: background 0.15s;
+    }
+    .pie-leg-row:hover { background: var(--surface2); }
+    .pie-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .pie-leg-name { flex: 1; font-size: 0.78rem; font-weight: 500; }
+    .pie-leg-days { font-size: 0.72rem; color: var(--muted); }
+    .pie-leg-pct  { font-size: 0.78rem; font-weight: 700; min-width: 36px; text-align: right; }
+    .pie-mini-bar { height: 3px; border-radius: 3px; background: var(--border); margin-top: 2px; overflow: hidden; }
+    .pie-mini-fill{ height: 100%; border-radius: 3px; }
+
+    /* ── TOOLTIP ── */
+    .tt {
+      position: fixed; background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text); padding: 0.55rem 0.85rem;
+      border-radius: 10px; font-size: 0.78rem;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.15s; z-index: 999;
+      white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .tt.show { opacity: 1; }
+    .tt strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
+    .tt .tt-val { color: var(--blue); font-weight: 700; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 800px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-full  { grid-column: span 1; }
+      .day-cards   { grid-template-columns: repeat(4,1fr); }
+    }
+    @media (max-width: 520px) {
+      .day-cards { grid-template-columns: repeat(4,1fr); }
+      .hero-temp { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo"><span class="icon">🌤️</span> WeatherLens</div>
+  <div class="nav-right">
+    <span class="city-badge">📍 Pune, Maharashtra</span>
+    <span class="update-time">Updated: just now</span>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="city">Pune, Maharashtra</div>
+      <div class="date" id="heroDate"></div>
+      <div style="margin-top:1rem">
+        <div class="hero-temp">28<span>°C</span></div>
+        <div class="hero-desc">⛅ Partly Cloudy</div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hs-label">Humidity</div><div class="hs-val" style="color:var(--blue)">62%</div></div>
+        <div class="hero-stat"><div class="hs-label">Wind</div><div class="hs-val" style="color:var(--green)">14 km/h</div></div>
+        <div class="hero-stat"><div class="hs-label">UV Index</div><div class="hs-val" style="color:var(--orange)">6 – High</div></div>
+        <div class="hero-stat"><div class="hs-label">Pressure</div><div class="hs-val">1012 hPa</div></div>
+        <div class="hero-stat"><div class="hs-label">Visibility</div><div class="hs-val">10 km</div></div>
+      </div>
+    </div>
+    <div style="font-size:7rem;opacity:0.9">⛅</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- Day cards -->
+  <div class="sec-title">📅 7-Day Forecast</div>
+  <div class="day-cards" id="dayCards"></div>
+
+  <!-- Charts -->
+  <div class="sec-title">📈 Weekly Analytics</div>
+  <div class="charts-grid">
+
+    <!-- LINE CHART: Temperature -->
+    <div class="chart-card chart-full">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">🌡️ Temperature Trend</div>
+          <div class="chart-card-sub">High & Low temperatures across the week (°C)</div>
+        </div>
+        <div class="chart-legend">
+          <div class="cl-item"><div class="cl-dot" style="background:#f0883e"></div>High</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#58a6ff"></div>Low</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#3fb950;border-radius:2px;width:20px;height:3px"></div>Avg</div>
+        </div>
+      </div>
+      <canvas id="lineChart" height="200"></canvas>
+    </div>
+
+    <!-- BAR CHART: Rainfall -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">🌧️ Rainfall</div>
+          <div class="chart-card-sub">Daily precipitation (mm)</div>
+        </div>
+      </div>
+      <canvas id="barChart" height="220"></canvas>
+    </div>
+
+    <!-- PIE CHART: Weather types -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">🌈 Weather Distribution</div>
+          <div class="chart-card-sub">Days by condition type</div>
+        </div>
+      </div>
+      <div class="pie-wrap">
+        <div class="pie-canvas-wrap">
+          <canvas id="pieChart" width="180" height="180"></canvas>
+          <div class="pie-center">
+            <div class="pc-val" id="pcVal">7</div>
+            <div class="pc-lbl">Total Days</div>
+          </div>
+        </div>
+        <div class="pie-legend" id="pieLegend"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Humidity BAR -->
+  <div class="charts-grid">
+    <div class="chart-card chart-full">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">💧 Humidity & Wind Speed</div>
+          <div class="chart-card-sub">Daily comparison (Humidity % · Wind km/h)</div>
+        </div>
+        <div class="chart-legend">
+          <div class="cl-item"><div class="cl-dot" style="background:#58a6ff"></div>Humidity %</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#3fb950"></div>Wind km/h</div>
+        </div>
+      </div>
+      <canvas id="humidChart" height="180"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="tt" id="tt"></div>
+
+<script>
+  // ── Static weekly data ──
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const data = {
+    hiTemp:    [32, 29, 27, 31, 35, 33, 28],
+    loTemp:    [21, 20, 18, 22, 24, 23, 19],
+    rain:      [0,  8,  15, 2,  0,  0,  5 ],
+    humidity:  [55, 68, 78, 60, 42, 48, 70],
+    wind:      [12, 18, 22, 14, 8,  10, 16],
+    icons:     ['☀️','🌦️','🌧️','⛅','☀️','☀️','🌥️'],
+    condition: ['Sunny','Showers','Rainy','Partly Cloudy','Sunny','Sunny','Cloudy'],
+  };
+
+  const pieData = [
+    { label:'Sunny',        days:3, color:'#f0883e', icon:'☀️' },
+    { label:'Partly Cloudy',days:1, color:'#d29922', icon:'⛅' },
+    { label:'Cloudy',       days:1, color:'#7d8590', icon:'🌥️' },
+    { label:'Rainy',        days:1, color:'#58a6ff', icon:'🌧️' },
+    { label:'Showers',      days:1, color:'#bc8cff', icon:'🌦️' },
+  ];
+
+  // Hero date
+  document.getElementById('heroDate').textContent =
+    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // ── Day cards ──
+  const dcEl = document.getElementById('dayCards');
+  days.forEach((d,i) => {
+    const div = document.createElement('div');
+    div.className = 'day-card' + (i===0?' today':'');
+    div.innerHTML = `
+      <div class="dc-day">${d}</div>
+      <div class="dc-icon">${data.icons[i]}</div>
+      <div class="dc-hi">${data.hiTemp[i]}°</div>
+      <div class="dc-lo">${data.loTemp[i]}°</div>
+      <div class="dc-pcp">${data.rain[i]?data.rain[i]+'mm':'—'}</div>
+    `;
+    dcEl.appendChild(div);
+  });
+
+  // ── Tooltip helper ──
+  const tt = document.getElementById('tt');
+  function showTT(e, html) {
+    tt.innerHTML = html; tt.classList.add('show');
+    tt.style.left = (e.clientX+14)+'px';
+    tt.style.top  = (e.clientY-44)+'px';
+  }
+  function hideTT() { tt.classList.remove('show'); }
+
+  // ── Utility: canvas point from mouse ──
+  function relPos(canvas, e) {
+    const r = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / r.width;
+    const scaleY = canvas.height / r.height;
+    return { x:(e.clientX-r.left)*scaleX, y:(e.clientY-r.top)*scaleY };
+  }
+
+  // ════════════════════════════════
+  // 1. LINE CHART — Temperature
+  // ════════════════════════════════
+  (function() {
+    const canvas = document.getElementById('lineChart');
+    const ctx    = canvas.getContext('2d');
+    const W = canvas.offsetWidth, H = 200;
+    canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const PAD = { top:30, right:20, bottom:40, left:40 };
+    const PW = W - PAD.left - PAD.right;
+    const PH = H - PAD.top  - PAD.bottom;
+    const allT = [...data.hiTemp, ...data.loTemp];
+    const minT = Math.min(...allT) - 2, maxT = Math.max(...allT) + 2;
+    const avgT = Math.round(data.hiTemp.reduce((a,b)=>a+b,0)/7);
+
+    function xPos(i) { return PAD.left + (i / (days.length-1)) * PW; }
+    function yPos(v) { return PAD.top + PH - ((v - minT)/(maxT - minT)) * PH; }
+
+    // Draw gridlines
+    ctx.strokeStyle = '#30363d'; ctx.lineWidth = 0.5;
+    for (let i=0;i<=4;i++) {
+      const y = PAD.top + (PH/4)*i;
+      ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+PW,y); ctx.stroke();
+      const val = Math.round(maxT - ((maxT-minT)/4)*i);
+      ctx.fillStyle = '#7d8590'; ctx.font = '10px Inter'; ctx.textAlign='right';
+      ctx.fillText(val+'°', PAD.left-6, y+4);
+    }
+
+    // Average line (dashed)
+    ctx.beginPath(); ctx.setLineDash([5,4]); ctx.strokeStyle='#3fb95088'; ctx.lineWidth=1.5;
+    ctx.moveTo(PAD.left, yPos(avgT)); ctx.lineTo(PAD.left+PW, yPos(avgT));
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // Fill area under Hi line
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(data.hiTemp[0]));
+    data.hiTemp.forEach((v,i) => ctx.lineTo(xPos(i), yPos(v)));
+    ctx.lineTo(xPos(days.length-1), H); ctx.lineTo(xPos(0), H);
+    ctx.closePath();
+    const gradH = ctx.createLinearGradient(0, PAD.top, 0, H);
+    gradH.addColorStop(0,'rgba(240,136,62,0.25)'); gradH.addColorStop(1,'rgba(240,136,62,0)');
+    ctx.fillStyle = gradH; ctx.fill();
+
+    // Fill area under Lo line
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), yPos(data.loTemp[0]));
+    data.loTemp.forEach((v,i) => ctx.lineTo(xPos(i), yPos(v)));
+    ctx.lineTo(xPos(days.length-1), H); ctx.lineTo(xPos(0), H);
+    ctx.closePath();
+    const gradL = ctx.createLinearGradient(0, PAD.top, 0, H);
+    gradL.addColorStop(0,'rgba(88,166,255,0.15)'); gradL.addColorStop(1,'rgba(88,166,255,0)');
+    ctx.fillStyle = gradL; ctx.fill();
+
+    // Hi line
+    function drawLine(arr, color) {
+      ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.lineJoin='round';
+      arr.forEach((v,i)=> i===0 ? ctx.moveTo(xPos(i),yPos(v)) : ctx.lineTo(xPos(i),yPos(v)));
+      ctx.stroke();
+      arr.forEach((v,i)=>{
+        ctx.beginPath(); ctx.arc(xPos(i),yPos(v),4,0,Math.PI*2);
+        ctx.fillStyle='#161b22'; ctx.fill();
+        ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
+      });
+    }
+    drawLine(data.hiTemp, '#f0883e');
+    drawLine(data.loTemp, '#58a6ff');
+
+    // X labels
+    days.forEach((d,i)=>{
+      ctx.fillStyle='#7d8590'; ctx.font='11px Inter'; ctx.textAlign='center';
+      ctx.fillText(d, xPos(i), H-6);
+    });
+
+    // Hover
+    canvas.addEventListener('mousemove', e=>{
+      const {x} = relPos(canvas, e);
+      const idx = Math.round((x/devicePixelRatio - PAD.left) / (PW/(days.length-1)));
+      if (idx<0||idx>=days.length) return hideTT();
+      showTT(e,`<strong>${days[idx]}</strong>
+        <span class="tt-val">Hi: ${data.hiTemp[idx]}°C</span> &nbsp; Lo: ${data.loTemp[idx]}°C`);
+    });
+    canvas.addEventListener('mouseleave', hideTT);
+  })();
+
+  // ════════════════════════════════
+  // 2. BAR CHART — Rainfall
+  // ════════════════════════════════
+  (function() {
+    const canvas = document.getElementById('barChart');
+    const ctx    = canvas.getContext('2d');
+    const W = canvas.offsetWidth, H = 220;
+    canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const PAD = { top:24, right:16, bottom:40, left:40 };
+    const PW = W - PAD.left - PAD.right;
+    const PH = H - PAD.top  - PAD.bottom;
+    const maxR = Math.max(...data.rain, 5);
+    const barW = (PW / days.length) * 0.55;
+    const gap  = PW / days.length;
+
+    // Gridlines
+    for (let i=0;i<=4;i++) {
+      const y = PAD.top + (PH/4)*i;
+      ctx.strokeStyle='#30363d'; ctx.lineWidth=0.5;
+      ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+PW,y); ctx.stroke();
+      const val = Math.round(maxR - (maxR/4)*i);
+      ctx.fillStyle='#7d8590'; ctx.font='10px Inter'; ctx.textAlign='right';
+      ctx.fillText(val+'mm', PAD.left-5, y+4);
+    }
+
+    // Animated bars
+    let prog = 0;
+    function drawBars() {
+      ctx.clearRect(PAD.left, PAD.top, PW, PH+2);
+      // redraw gridlines
+      for (let i=0;i<=4;i++){
+        const y=PAD.top+(PH/4)*i;
+        ctx.strokeStyle='#30363d'; ctx.lineWidth=0.5;
+        ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+PW,y); ctx.stroke();
+      }
+      data.rain.forEach((v,i)=>{
+        const x  = PAD.left + gap*i + (gap-barW)/2;
+        const bh = (v/maxR) * PH * Math.min(prog,1);
+        const y  = PAD.top + PH - bh;
+        // Gradient bar
+        const grad = ctx.createLinearGradient(0,y,0,PAD.top+PH);
+        grad.addColorStop(0, v>10 ? '#f43f5e' : v>0 ? '#58a6ff' : '#30363d');
+        grad.addColorStop(1, v>10 ? '#f43f5e33' : v>0 ? '#58a6ff33' : '#30363d33');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(x,y,barW,bh,6) : ctx.rect(x,y,barW,bh);
+        ctx.fill();
+        // Value label
+        if (prog >= 1 && v > 0) {
+          ctx.fillStyle='#e6edf3'; ctx.font='bold 10px Inter'; ctx.textAlign='center';
+          ctx.fillText(v+'mm', x+barW/2, y-5);
+        }
+      });
+    }
+
+    function anim() {
+      prog += 0.05;
+      drawBars();
+      if (prog < 1) requestAnimationFrame(anim);
+      else drawBars();
+    }
+    anim();
+
+    // X labels
+    days.forEach((d,i)=>{
+      const x = PAD.left + gap*i + gap/2;
+      ctx.fillStyle='#7d8590'; ctx.font='11px Inter'; ctx.textAlign='center';
+      ctx.fillText(d, x, H-8);
+    });
+
+    // Hover
+    canvas.addEventListener('mousemove', e=>{
+      const {x,y} = relPos(canvas, e);
+      const rx = x/devicePixelRatio, ry = y/devicePixelRatio;
+      let hit = -1;
+      data.rain.forEach((v,i)=>{
+        const bx = PAD.left + gap*i + (gap-barW)/2;
+        const bh = (v/maxR) * PH;
+        if (rx>=bx && rx<=bx+barW && ry>=(PAD.top+PH-bh) && ry<=PAD.top+PH) hit=i;
+      });
+      if (hit>=0) showTT(e,`<strong>${days[hit]}</strong> <span class="tt-val">${data.rain[hit]}mm rainfall</span>`);
+      else hideTT();
+    });
+    canvas.addEventListener('mouseleave', hideTT);
+  })();
+
+  // ════════════════════════════════
+  // 3. PIE/DOUGHNUT — Weather types
+  // ════════════════════════════════
+  (function() {
+    const canvas = document.getElementById('pieChart');
+    const ctx    = canvas.getContext('2d');
+    const CX=90, CY=90, R=80, r=52;
+    const total = pieData.reduce((s,d)=>s+d.days,0);
+    const GAP   = 0.04;
+    let angles  = [], activeI = -1;
+
+    function buildAngles() {
+      let start = -Math.PI/2;
+      angles = pieData.map(d=>{
+        const sweep = (d.days/total)*(2*Math.PI - pieData.length*GAP);
+        const a = { start, end:start+sweep, ...d };
+        start += sweep + GAP;
+        return a;
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,180,180);
+      angles.forEach((a,i)=>{
+        const active = activeI===i;
+        const off = active?6:0;
+        const mid = (a.start+a.end)/2;
+        const ox = Math.cos(mid)*off, oy = Math.sin(mid)*off;
+        ctx.beginPath();
+        ctx.moveTo(CX+ox,CY+oy);
+        ctx.arc(CX+ox,CY+oy, active?R+6:R, a.start, a.end);
+        ctx.arc(CX+ox,CY+oy, r, a.end, a.start, true);
+        ctx.closePath();
+        ctx.fillStyle = a.color;
+        if (active) { ctx.shadowColor=a.color+'66'; ctx.shadowBlur=14; }
+        else ctx.shadowBlur=0;
+        ctx.fill();
+      });
+      ctx.shadowBlur=0;
+      // Center hole
+      ctx.beginPath(); ctx.arc(CX,CY,r-2,0,Math.PI*2);
+      ctx.fillStyle='#161b22'; ctx.fill();
+    }
+
+    buildAngles(); draw();
+
+    // Pie legend
+    const legEl = document.getElementById('pieLegend');
+    function renderLeg() {
+      legEl.innerHTML = pieData.map((d,i)=>`
+        <div class="pie-leg-row" onmouseenter="pieHover(${i})" onmouseleave="pieUnhover()">
+          <div class="pie-leg-dot" style="background:${d.color}"></div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span class="pie-leg-name">${d.icon} ${d.label}</span>
+              <span class="pie-leg-pct" style="color:${d.color}">${((d.days/total)*100).toFixed(0)}%</span>
+            </div>
+            <div class="pie-mini-bar">
+              <div class="pie-mini-fill" style="width:${(d.days/total)*100}%;background:${d.color}"></div>
+            </div>
+          </div>
+          <span class="pie-leg-days">${d.days}d</span>
+        </div>
+      `).join('');
+    }
+    renderLeg();
+
+    window.pieHover = function(i) {
+      activeI=i; draw();
+      document.getElementById('pcVal').textContent = pieData[i].days;
+      document.getElementById('pcVal').style.color = pieData[i].color;
+    };
+    window.pieUnhover = function() {
+      activeI=-1; draw();
+      document.getElementById('pcVal').textContent = total;
+      document.getElementById('pcVal').style.color = '';
+    };
+
+    // Mouse on canvas
+    canvas.addEventListener('mousemove', e=>{
+      const r2 = canvas.getBoundingClientRect();
+      const mx = e.clientX-r2.left-CX, my = e.clientY-r2.top-CY;
+      const dist = Math.sqrt(mx*mx+my*my);
+      if (dist<r||dist>R+8) { pieUnhover(); return; }
+      let angle = Math.atan2(my,mx);
+      if (angle<-Math.PI/2) angle+=2*Math.PI;
+      const hit = angles.findIndex(a=>angle>=a.start&&angle<=a.end);
+      if (hit>=0) pieHover(hit);
+    });
+    canvas.addEventListener('mouseleave', pieUnhover);
+  })();
+
+  // ════════════════════════════════
+  // 4. GROUPED BAR — Humidity & Wind
+  // ════════════════════════════════
+  (function() {
+    const canvas = document.getElementById('humidChart');
+    const ctx    = canvas.getContext('2d');
+    const W = canvas.offsetWidth, H = 180;
+    canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const PAD = { top:20, right:16, bottom:40, left:40 };
+    const PW = W - PAD.left - PAD.right;
+    const PH = H - PAD.top  - PAD.bottom;
+    const maxV = 100;
+    const groupW = PW / days.length;
+    const barW   = groupW * 0.3;
+
+    // Grid
+    for (let i=0;i<=4;i++){
+      const y=PAD.top+(PH/4)*i;
+      ctx.strokeStyle='#30363d'; ctx.lineWidth=0.5;
+      ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+PW,y); ctx.stroke();
+      ctx.fillStyle='#7d8590'; ctx.font='10px Inter'; ctx.textAlign='right';
+      ctx.fillText(Math.round(100-(100/4)*i), PAD.left-5, y+4);
+    }
+
+    let prog=0;
+    function drawBars() {
+      ctx.clearRect(PAD.left,PAD.top,PW,PH+2);
+      for (let i=0;i<=4;i++){
+        const y=PAD.top+(PH/4)*i;
+        ctx.strokeStyle='#30363d'; ctx.lineWidth=0.5;
+        ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+PW,y); ctx.stroke();
+      }
+      days.forEach((d,i)=>{
+        const cx = PAD.left + groupW*i + groupW/2;
+
+        // Humidity bar
+        const hh = (data.humidity[i]/maxV)*PH*Math.min(prog,1);
+        const hx = cx - barW - 2;
+        const grad1 = ctx.createLinearGradient(0,PAD.top+PH-hh,0,PAD.top+PH);
+        grad1.addColorStop(0,'#58a6ff'); grad1.addColorStop(1,'#58a6ff44');
+        ctx.fillStyle=grad1;
+        ctx.beginPath();
+        ctx.roundRect?ctx.roundRect(hx,PAD.top+PH-hh,barW,hh,4):ctx.rect(hx,PAD.top+PH-hh,barW,hh);
+        ctx.fill();
+
+        // Wind bar
+        const wh = (data.wind[i]/maxV)*PH*Math.min(prog,1);
+        const wx = cx + 2;
+        const grad2 = ctx.createLinearGradient(0,PAD.top+PH-wh,0,PAD.top+PH);
+        grad2.addColorStop(0,'#3fb950'); grad2.addColorStop(1,'#3fb95044');
+        ctx.fillStyle=grad2;
+        ctx.beginPath();
+        ctx.roundRect?ctx.roundRect(wx,PAD.top+PH-wh,barW,wh,4):ctx.rect(wx,PAD.top+PH-wh,barW,wh);
+        ctx.fill();
+      });
+    }
+
+    function anim(){ prog+=0.05; drawBars(); if(prog<1) requestAnimationFrame(anim); else drawBars(); }
+    anim();
+
+    days.forEach((d,i)=>{
+      const cx = PAD.left + groupW*i + groupW/2;
+      ctx.fillStyle='#7d8590'; ctx.font='11px Inter'; ctx.textAlign='center';
+      ctx.fillText(d, cx, H-8);
+    });
+
+    canvas.addEventListener('mousemove', e=>{
+      const {x} = relPos(canvas, e);
+      const rx = x/devicePixelRatio;
+      const idx = Math.floor((rx-PAD.left)/groupW);
+      if (idx<0||idx>=days.length) return hideTT();
+      showTT(e,`<strong>${days[idx]}</strong>
+        <span class="tt-val">💧 ${data.humidity[idx]}%</span> &nbsp;
+        🌬️ ${data.wind[idx]} km/h`);
+    });
+    canvas.addEventListener('mouseleave', hideTT);
+  })();
+</script>
+</body>
+</html>

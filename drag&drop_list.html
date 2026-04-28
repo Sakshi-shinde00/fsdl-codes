@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drag-and-Drop List</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;font-family:'Manrope',sans-serif;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .container{background:#fff;border-radius:24px;padding:2.5rem;width:100%;max-width:480px;box-shadow:0 30px 80px #0004;}
+  h1{font-size:1.6rem;font-weight:800;color:#111;margin-bottom:.4rem;}
+  p.sub{font-size:.85rem;color:#888;margin-bottom:2rem;}
+  .list{display:flex;flex-direction:column;gap:.8rem;}
+  .item{display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;cursor:grab;user-select:none;transition:box-shadow .2s,transform .2s,border-color .2s;}
+  .item:hover{border-color:#a5b4fc;box-shadow:0 4px 15px #6366f120;}
+  .item.dragging{opacity:.5;cursor:grabbing;transform:scale(1.03);box-shadow:0 10px 30px #0003;}
+  .item.drag-over{border-color:#6366f1;background:#f5f3ff;}
+  .drag-handle{font-size:1.1rem;color:#cbd5e1;}
+  .rank{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .emoji{font-size:1.4rem;}
+  .item-text{flex:1;}
+  .item-name{font-weight:700;font-size:.95rem;color:#1e293b;}
+  .item-sub{font-size:.78rem;color:#94a3b8;}
+  .info{text-align:center;margin-top:1.5rem;font-size:.82rem;color:#94a3b8;background:#f8fafc;padding:.6rem;border-radius:10px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Drag & Drop List</h1>
+  <p class="sub">Drag items to reorder your priorities</p>
+  <div class="list" id="dragList"></div>
+  <div class="info">💡 Drag items up or down to reorder them</div>
+</div>
+<script>
+let items=[
+  {emoji:"🚀",name:"Launch Website",sub:"Complete the main project"},
+  {emoji:"📚",name:"Study JavaScript",sub:"Finish advanced topics"},
+  {emoji:"🎨",name:"Design Portfolio",sub:"Update with new projects"},
+  {emoji:"💪",name:"Exercise",sub:"30 min daily workout"},
+  {emoji:"📧",name:"Reply Emails",sub:"Clear inbox backlog"},
+  {emoji:"🍕",name:"Team Lunch",sub:"Friday afternoon plan"},
+  {emoji:"🔒",name:"Code Review",sub:"Review pull requests"},
+];
+
+let dragSrc=null;
+
+function renderList(){
+  const list=document.getElementById('dragList');
+  list.innerHTML='';
+  items.forEach((item,i)=>{
+    const div=document.createElement('div');
+    div.className='item';
+    div.draggable=true;
+    div.dataset.index=i;
+    div.innerHTML=`<span class="drag-handle">⠿</span><div class="rank">${i+1}</div><span class="emoji">${item.emoji}</span><div class="item-text"><div class="item-name">${item.name}</div><div class="item-sub">${item.sub}</div></div>`;
+    div.addEventListener('dragstart',e=>{dragSrc=i;div.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    div.addEventListener('dragend',()=>div.classList.remove('dragging'));
+    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('drag-over');});
+    div.addEventListener('dragleave',()=>div.classList.remove('drag-over'));
+    div.addEventListener('drop',e=>{
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      if(dragSrc!==null&&dragSrc!==i){
+        const moved=items.splice(dragSrc,1)[0];
+        items.splice(i,0,moved);
+        renderList();
+      }
+    });
+    list.appendChild(div);
+  });
+}
+renderList();
+</script>
+</body>
+</html>

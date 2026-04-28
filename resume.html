@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume – Rohan Sharma</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#e5e7eb;font-family:'DM Sans',sans-serif;padding:2rem;color:#1f2937;}
+  .page{background:#fff;max-width:800px;margin:0 auto;box-shadow:0 10px 40px #0003;}
+  /* Header */
+  .resume-header{background:#1e3a5f;color:#fff;padding:2.5rem 3rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap;}
+  .name{font-family:'Crimson Pro',serif;font-size:2.5rem;font-weight:700;letter-spacing:.02em;}
+  .job-title{font-size:.95rem;color:#93c5fd;margin-top:.3rem;letter-spacing:.1em;text-transform:uppercase;}
+  .contact-info{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;}
+  .contact-info a,.contact-info span{font-size:.82rem;color:#bfdbfe;text-decoration:none;}
+  /* Body */
+  .resume-body{display:grid;grid-template-columns:1fr 2fr;gap:0;}
+  .sidebar{background:#f1f5f9;padding:2.5rem 2rem;border-right:1px solid #e2e8f0;}
+  .main-col{padding:2.5rem 2.5rem;}
+  /* Section */
+  .section{margin-bottom:2rem;}
+  .section-title{font-family:'Crimson Pro',serif;font-size:1.1rem;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:.1em;border-bottom:2.5px solid #1e3a5f;padding-bottom:.3rem;margin-bottom:1rem;}
+  /* Skills */
+  .skill-wrap{margin-bottom:.7rem;}
+  .skill-name{font-size:.8rem;font-weight:600;margin-bottom:.25rem;color:#374151;}
+  .skill-bar{height:6px;background:#dbeafe;border-radius:99px;overflow:hidden;}
+  .skill-fill{height:100%;background:linear-gradient(90deg,#1e3a5f,#3b82f6);border-radius:99px;}
+  /* Lang / Tool tags */
+  .tag-list{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tag{background:#dbeafe;color:#1e3a5f;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:5px;}
+  /* Objective */
+  p.objective{font-size:.88rem;color:#4b5563;line-height:1.7;}
+  /* Experience / Education */
+  .entry{margin-bottom:1.3rem;}
+  .entry-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.3rem;}
+  .entry-title{font-size:.95rem;font-weight:700;color:#1e293b;}
+  .entry-org{font-size:.85rem;color:#2563eb;font-weight:600;}
+  .entry-date{font-size:.78rem;color:#94a3b8;white-space:nowrap;}
+  .entry ul{padding-left:1.1rem;margin-top:.4rem;}
+  .entry li{font-size:.82rem;color:#4b5563;margin-bottom:.25rem;line-height:1.5;}
+  .edu-degree{font-size:.93rem;font-weight:700;color:#1e293b;}
+  .edu-school{font-size:.83rem;color:#2563eb;}
+  .edu-score{font-size:.78rem;color:#64748b;}
+  /* Projects */
+  .project-title{font-size:.93rem;font-weight:700;color:#1e293b;}
+  .project-tech{font-size:.75rem;color:#7c3aed;font-weight:600;margin:.2rem 0;}
+  .project-desc{font-size:.82rem;color:#4b5563;line-height:1.5;}
+  @media print{body{background:white;padding:0;}.page{box-shadow:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="resume-header">
+    <div>
+      <div class="name">akanksha Sharma</div>
+      <div class="job-title">Full Stack Developer</div>
+    </div>
+    <div class="contact-info">
+      <span>📧 akanksha.sharma@email.com</span>
+      <span>📞 +91 98765 43210</span>
+      <span>📍 Pune, Maharashtra</span>
+      <span>🔗 github.com/rohansharma</span>
+    </div>
+  </div>
+  <div class="resume-body">
+    <div class="sidebar">
+      <div class="section">
+        <div class="section-title">Skills</div>
+        <div class="skill-wrap"><div class="skill-name">HTML & CSS</div><div class="skill-bar"><div class="skill-fill" style="width:92%"></div></div></div>
+        <div class="skill-wrap"><div class="skill-name">JavaScript</div><div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div></div>
+        <div class="skill-wrap"><div class="skill-name">Node.js</div><div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div></div>
+        <div class="skill-wrap"><div class="skill-name">MongoDB</div><div class="skill-bar"><div class="skill-fill" style="width:65%"></div></div></div>
+        <div class="skill-wrap"><div class="skill-name">React.js</div><div class="skill-bar"><div class="skill-fill" style="width:60%"></div></div></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Tools</div>
+        <div class="tag-list">
+          <span class="tag">Git</span><span class="tag">VS Code</span><span class="tag">Postman</span><span class="tag">MongoDB Compass</span><span class="tag">Figma</span><span class="tag">GitHub</span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Languages</div>
+        <div class="tag-list"><span class="tag">Marathi</span><span class="tag">Hindi</span><span class="tag">English</span></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Interests</div>
+        <div class="tag-list"><span class="tag">Open Source</span><span class="tag">UI Design</span><span class="tag">Chess</span><span class="tag">Blogging</span></div>
+      </div>
+    </div>
+    <div class="main-col">
+      <div class="section">
+        <div class="section-title">Objective</div>
+        <p class="objective">Motivated B.Tech Computer Science student with strong skills in full stack web development. Seeking an opportunity to apply my knowledge of HTML, CSS, JavaScript, Node.js, and MongoDB to build scalable, user-friendly web applications and contribute to a forward-thinking team.</p>
+      </div>
+      <div class="section">
+        <div class="section-title">Education</div>
+        <div class="entry">
+          <div class="edu-degree">B.Tech – Computer Science & Engineering</div>
+          <div class="edu-school">MIT College of Engineering, Pune</div>
+          <div class="edu-score">2021 – 2025 | CGPA: 8.6 / 10</div>
+        </div>
+        <div class="entry">
+          <div class="edu-degree">HSC (XII) – Science</div>
+          <div class="edu-school">Podar International School, Pune</div>
+          <div class="edu-score">2021 | 88.4%</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Projects</div>
+        <div class="entry">
+          <div class="project-title">🛒 E-Commerce Platform</div>
+          <div class="project-tech">React.js • Node.js • MongoDB • Express</div>
+          <div class="project-desc">Built a full-stack shopping app with product listing, cart, checkout, and admin panel. Implemented JWT authentication and REST APIs.</div>
+        </div>
+        <div class="entry">
+          <div class="project-title">📊 Student Dashboard</div>
+          <div class="project-tech">HTML • CSS • JavaScript • Chart.js</div>
+          <div class="project-desc">Developed a data visualization dashboard showing attendance, marks, and performance trends using Chart.js with dynamic data rendering.</div>
+        </div>
+        <div class="entry">
+          <div class="project-title">📝 Task Manager App</div>
+          <div class="project-tech">Node.js • Express • MongoDB</div>
+          <div class="project-desc">Created a REST API–based task management system with CRUD operations, user authentication, and task prioritization.</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Contact Information</div>
+        <table style="width:100%;font-size:.84rem;border-collapse:collapse;">
+          <tr><td style="padding:.3rem 0;color:#64748b;width:40%;">Email</td><td style="color:#1e293b;">rohan.sharma@email.com</td></tr>
+          <tr><td style="padding:.3rem 0;color:#64748b;">Phone</td><td style="color:#1e293b;">+91 98765 43210</td></tr>
+          <tr><td style="padding:.3rem 0;color:#64748b;">Location</td><td style="color:#1e293b;">Pune, Maharashtra, India</td></tr>
+          <tr><td style="padding:.3rem 0;color:#64748b;">GitHub</td><td style="color:#2563eb;">github.com/rohansharma</td></tr>
+          <tr><td style="padding:.3rem 0;color:#64748b;">LinkedIn</td><td style="color:#2563eb;">linkedin.com/in/rohansharma</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .app{background:#fff;border-radius:24px;padding:2.5rem;width:100%;max-width:480px;box-shadow:0 30px 80px #0005;}
+  h1{font-size:1.8rem;font-weight:800;color:#1e293b;margin-bottom:.3rem;}
+  .stats{font-size:.82rem;color:#94a3b8;margin-bottom:1.8rem;}
+  .stats span{color:#6366f1;font-weight:700;}
+  .add-row{display:flex;gap:.7rem;margin-bottom:1.5rem;}
+  .add-row input{flex:1;padding:.7rem 1rem;border:2px solid #e2e8f0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.93rem;outline:none;transition:border .2s;}
+  .add-row input:focus{border-color:#6366f1;}
+  .add-row button{background:#6366f1;color:#fff;border:none;padding:.7rem 1.2rem;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size.95rem;white-space:nowrap;}
+  .add-row button:hover{background:#4f46e5;}
+  .filters{display:flex;gap:.5rem;margin-bottom:1.2rem;}
+  .filter-btn{padding:.35rem .8rem;border-radius:8px;border:1.5px solid #e2e8f0;background:transparent;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:.2s;}
+  .filter-btn.active{background:#6366f1;border-color:#6366f1;color:#fff;}
+  .task-list{display:flex;flex-direction:column;gap:.6rem;min-height:60px;}
+  .task{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;transition:all .2s;}
+  .task.done{background:#f0fdf4;border-color:#bbf7d0;}
+  .task.done .task-text{text-decoration:line-through;color:#94a3b8;}
+  .checkbox{width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;}
+  .task.done .checkbox{background:#22c55e;border-color:#22c55e;color:#fff;font-size:.7rem;}
+  .task-text{flex:1;font-size:.92rem;font-weight:600;color:#1e293b;}
+  .del-btn{background:none;border:none;cursor:pointer;font-size:1rem;color:#fca5a5;transition:color .2s;padding:.1rem;}
+  .del-btn:hover{color:#ef4444;}
+  .empty{text-align:center;padding:2rem;color:#cbd5e1;font-size:.9rem;}
+  .clear-btn{width:100%;background:transparent;border:1.5px solid #fca5a5;color:#ef4444;padding:.6rem;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;margin-top:1rem;transition:.2s;font-size:.88rem;}
+  .clear-btn:hover{background:#fef2f2;}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>✅ To-Do List</h1>
+  <div class="stats">Total: <span id="total">0</span> | Pending: <span id="pending">0</span> | Done: <span id="done">0</span></div>
+  <div class="add-row">
+    <input type="text" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key==='Enter')addTask()">
+    <button onclick="addTask()">+ Add</button>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">Done</button>
+  </div>
+  <div class="task-list" id="taskList"></div>
+  <button class="clear-btn" onclick="clearDone()">🗑 Clear Completed</button>
+</div>
+<script>
+let tasks=[{id:1,text:"Study JavaScript DOM",done:false},{id:2,text:"Build FSDL project",done:false},{id:3,text:"Submit assignment",done:true}];
+let filter='all';
+let nextId=4;
+
+function addTask(){
+  const input=document.getElementById('taskInput');
+  const text=input.value.trim();
+  if(!text)return;
+  tasks.push({id:nextId++,text,done:false});
+  input.value='';
+  render();
+}
+
+function toggleTask(id){
+  tasks=tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
+  render();
+}
+
+function deleteTask(id){
+  tasks=tasks.filter(t=>t.id!==id);
+  render();
+}
+
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function clearDone(){tasks=tasks.filter(t=>!t.done);render();}
+
+function render(){
+  const visible=tasks.filter(t=>filter==='all'?true:filter==='done'?t.done:!t.done);
+  const list=document.getElementById('taskList');
+  if(!visible.length){list.innerHTML='<div class="empty">No tasks here 🌿</div>';}
+  else list.innerHTML=visible.map(t=>`
+    <div class="task ${t.done?'done':''}">
+      <div class="checkbox" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+      <span class="task-text">${t.text}</span>
+      <button class="del-btn" onclick="deleteTask(${t.id})">✕</button>
+    </div>`).join('');
+  document.getElementById('total').textContent=tasks.length;
+  document.getElementById('pending').textContent=tasks.filter(t=>!t.done).length;
+  document.getElementById('done').textContent=tasks.filter(t=>t.done).length;
+}
+render();
+</script>
+</body>
+</html>

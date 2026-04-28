@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Doughnut Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f2f8;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #94a3b8;
+      --present: #22c55e;
+      --absent:  #f43f5e;
+      --leave:   #f59e0b;
+      --late:    #6366f1;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem 5rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-header .tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: #6366f1;
+      background: #ede9fe;
+      border-radius: 20px;
+      padding: 0.28rem 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+    .page-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+    }
+    .page-header p { margin-top: 0.4rem; font-size: 0.88rem; color: var(--muted); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .card-title {
+      font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem;
+    }
+    .card-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* ── DOUGHNUT ── */
+    .doughnut-wrap {
+      position: relative;
+      width: 280px; height: 280px;
+      margin: 0 auto;
+    }
+
+    canvas#donut { display: block; }
+
+    .donut-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      transition: all 0.25s;
+    }
+    .donut-center .dc-value {
+      font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1;
+    }
+    .donut-center .dc-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-top: 4px;
+    }
+    .donut-center .dc-pct {
+      font-size: 0.82rem; font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* ── LEGEND ── */
+    .legend { margin-top: 1.75rem; display: flex; flex-direction: column; gap: 0.55rem; }
+    .legend-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+    }
+    .legend-item:hover { background: var(--bg); border-color: var(--border); }
+    .legend-item.active { border-color: currentColor; }
+
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0;
+    }
+    .legend-text { flex: 1; }
+    .legend-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .legend-count { font-size: 0.75rem; color: var(--muted); }
+    .legend-pct {
+      font-size: 0.85rem; font-weight: 700;
+    }
+
+    /* ── SIDE PANEL ── */
+    .side-panel { display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Stat card */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex; align-items: center; gap: 1rem;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+    .stat-card.active { border-width: 2px; }
+
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .stat-body { flex: 1; min-width: 0; }
+    .stat-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+    .stat-sub   { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    .stat-badge {
+      font-size: 0.75rem; font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 8px;
+      align-self: flex-start;
+    }
+
+    /* Progress bar in stat card */
+    .mini-bar { height: 4px; border-radius: 4px; background: var(--bg); margin-top: 0.5rem; overflow: hidden; }
+    .mini-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.22,1,0.36,1); }
+
+    /* ── MONTH SELECTOR ── */
+    .month-selector {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .month-btn {
+      padding: 0.3rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 0.75rem; font-weight: 600;
+      background: none; color: var(--muted);
+      cursor: pointer; transition: all 0.18s;
+    }
+    .month-btn:hover { border-color: #6366f1; color: #6366f1; }
+    .month-btn.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+
+    /* ── SUMMARY ROW ── */
+    .summary-row {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 0.75rem; margin-top: 0.5rem;
+    }
+    .sum-box {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 0.85rem 0.75rem;
+      text-align: center;
+      border: 1.5px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .sum-box:hover { border-color: var(--border); }
+    .sum-box .sb-val { font-size: 1.3rem; font-weight: 800; }
+    .sum-box .sb-lbl { font-size: 0.68rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+    /* ── TOOLTIP ── */
+    .tooltip {
+      position: fixed;
+      background: var(--text);
+      color: #fff;
+      padding: 0.55rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .tooltip.show { opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .doughnut-wrap { width: 240px; height: 240px; }
+      .summary-row { grid-template-columns: repeat(3,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="tag">📅 Attendance Report</div>
+  <h1>Attendance Distribution</h1>
+  <p>Monthly overview · Class XII-B · Academic Year 2024–25</p>
+</div>
+
+<!-- Month selector -->
+<div class="month-selector" style="max-width:960px;width:100%;margin-bottom:1rem">
+  <button class="month-btn" onclick="switchMonth(0,this)">January</button>
+  <button class="month-btn" onclick="switchMonth(1,this)">February</button>
+  <button class="month-btn active" onclick="switchMonth(2,this)">March</button>
+  <button class="month-btn" onclick="switchMonth(3,this)">April</button>
+  <button class="month-btn" onclick="switchMonth(4,this)">May</button>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: Doughnut + legend -->
+  <div class="card">
+    <div class="card-title">Attendance Breakdown</div>
+    <div class="card-sub" id="cardSub">March 2025 · 26 working days</div>
+
+    <div class="doughnut-wrap">
+      <canvas id="donut" width="280" height="280"></canvas>
+      <div class="donut-center" id="donutCenter">
+        <div class="dc-value" id="dcVal">–</div>
+        <div class="dc-label" id="dcLbl">Total Days</div>
+        <div class="dc-pct"  id="dcPct"></div>
+      </div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <div class="summary-row" id="summaryRow"></div>
+  </div>
+
+  <!-- RIGHT: Stat cards -->
+  <div class="side-panel" id="sidePanel"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  // ── Data per month ──
+  const months = [
+    { name:'January',  days:26, present:19, absent:3, leave:2, late:2 },
+    { name:'February', days:24, present:18, absent:2, leave:3, late:1 },
+    { name:'March',    days:26, present:20, absent:3, leave:2, late:1 },
+    { name:'April',    days:25, present:17, absent:4, leave:3, late:1 },
+    { name:'May',      days:22, present:16, absent:3, leave:2, late:1 },
+  ];
+
+  const CATEGORIES = [
+    { key:'present', label:'Present', color:'#22c55e', icon:'✅', bg:'#f0fdf4' },
+    { key:'absent',  label:'Absent',  color:'#f43f5e', icon:'❌', bg:'#fff1f2' },
+    { key:'leave',   label:'On Leave',color:'#f59e0b', icon:'📋', bg:'#fffbeb' },
+    { key:'late',    label:'Late',    color:'#6366f1', icon:'⏰', bg:'#eef2ff' },
+  ];
+
+  let current = 2; // March
+  let activeSlice = -1;
+
+  // ── Canvas setup ──
+  const canvas = document.getElementById('donut');
+  const ctx    = canvas.getContext('2d');
+  const CX = 140, CY = 140, R_OUT = 125, R_IN = 75;
+  const GAP = 0.025; // radians gap between slices
+
+  // ── Draw doughnut ──
+  let animProgress = 0;
+  let animFrame;
+  let sliceAngles = [];
+
+  function buildSlices(m) {
+    const total = m.days;
+    let start   = -Math.PI / 2;
+    sliceAngles = CATEGORIES.map(cat => {
+      const val   = m[cat.key];
+      const angle = (val / total) * (2 * Math.PI - CATEGORIES.length * GAP);
+      const s = { start, end: start + angle, color: cat.color, val, label: cat.label, pct: ((val/total)*100).toFixed(1) };
+      start += angle + GAP;
+      return s;
+    });
+  }
+
+  function drawDonut(progress = 1) {
+    ctx.clearRect(0, 0, 280, 280);
+
+    sliceAngles.forEach((s, i) => {
+      const endAngle = s.start + (s.end - s.start) * progress;
+      const isActive = activeSlice === i;
+      const offset   = isActive ? 10 : 0;
+      const midAngle = (s.start + endAngle) / 2;
+      const ox = Math.cos(midAngle) * offset;
+      const oy = Math.sin(midAngle) * offset;
+
+      // Shadow for active
+      if (isActive) {
+        ctx.shadowColor = s.color + '55';
+        ctx.shadowBlur  = 16;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(CX + ox, CY + oy);
+      ctx.arc(CX + ox, CY + oy, isActive ? R_OUT + 6 : R_OUT, s.start, endAngle);
+      ctx.arc(CX + ox, CY + oy, R_IN, endAngle, s.start, true);
+      ctx.closePath();
+      ctx.fillStyle = s.color;
+      ctx.fill();
+
+      // Highlight rim
+      ctx.beginPath();
+      ctx.arc(CX + ox, CY + oy, isActive ? R_OUT + 6 : R_OUT, s.start, endAngle);
+      ctx.arc(CX + ox, CY + oy, isActive ? R_OUT + 2 : R_OUT - 4, endAngle, s.start, true);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fill();
+    });
+
+    ctx.shadowBlur = 0;
+
+    // Center hole
+    ctx.beginPath();
+    ctx.arc(CX, CY, R_IN - 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  function animateDraw() {
+    cancelAnimationFrame(animFrame);
+    animProgress = 0;
+    function step() {
+      animProgress += 0.035;
+      if (animProgress >= 1) { animProgress = 1; drawDonut(1); return; }
+      drawDonut(animProgress);
+      animFrame = requestAnimationFrame(step);
+    }
+    step();
+  }
+
+  // ── Canvas mouse events ──
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx   = e.clientX - rect.left - CX;
+    const my   = e.clientY - rect.top  - CY;
+    const dist = Math.sqrt(mx*mx + my*my);
+
+    if (dist < R_IN || dist > R_OUT + 12) {
+      if (activeSlice !== -1) { activeSlice = -1; drawDonut(); resetCenter(); }
+      document.getElementById('tooltip').classList.remove('show');
+      return;
+    }
+    let angle = Math.atan2(my, mx);
+    if (angle < -Math.PI/2) angle += 2 * Math.PI;
+
+    const hit = sliceAngles.findIndex(s => angle >= s.start && angle <= s.end);
+    if (hit !== activeSlice) {
+      activeSlice = hit;
+      drawDonut();
+      if (hit >= 0) updateCenter(hit);
+    }
+
+    if (hit >= 0) {
+      const t    = document.getElementById('tooltip');
+      const m    = months[current];
+      const s    = sliceAngles[hit];
+      t.innerHTML = `<strong>${s.label}</strong>: ${s.val} days (${s.pct}%)`;
+      t.style.left = (e.clientX + 14) + 'px';
+      t.style.top  = (e.clientY - 36) + 'px';
+      t.classList.add('show');
+    } else {
+      document.getElementById('tooltip').classList.remove('show');
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    activeSlice = -1; drawDonut(); resetCenter();
+    document.getElementById('tooltip').classList.remove('show');
+  });
+
+  function updateCenter(i) {
+    const s = sliceAngles[i];
+    const cat = CATEGORIES[i];
+    document.getElementById('dcVal').textContent  = s.val;
+    document.getElementById('dcLbl').textContent  = s.label;
+    document.getElementById('dcPct').textContent  = s.pct + '%';
+    document.getElementById('dcPct').style.color  = s.color;
+  }
+
+  function resetCenter() {
+    const m = months[current];
+    document.getElementById('dcVal').textContent = m.days;
+    document.getElementById('dcLbl').textContent = 'Total Days';
+    document.getElementById('dcPct').textContent = '';
+  }
+
+  // ── Render legend ──
+  function renderLegend(m) {
+    const total = m.days;
+    const leg   = document.getElementById('legend');
+    leg.innerHTML = CATEGORIES.map((cat, i) => {
+      const val  = m[cat.key];
+      const pct  = ((val / total) * 100).toFixed(1);
+      return `
+        <div class="legend-item" style="color:${cat.color}"
+             onmouseenter="hoverSlice(${i})" onmouseleave="unhoverSlice()">
+          <div class="legend-dot" style="background:${cat.color}"></div>
+          <div class="legend-text">
+            <div class="legend-name">${cat.label}</div>
+            <div class="legend-count">${val} of ${total} days</div>
+          </div>
+          <div class="legend-pct" style="color:${cat.color}">${pct}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function hoverSlice(i) { activeSlice = i; drawDonut(); updateCenter(i); }
+  function unhoverSlice() { activeSlice = -1; drawDonut(); resetCenter(); }
+
+  // ── Summary row ──
+  function renderSummaryRow(m) {
+    const pct = (v => ((v/m.days)*100).toFixed(0));
+    document.getElementById('summaryRow').innerHTML = `
+      <div class="sum-box">
+        <div class="sb-val" style="color:#22c55e">${pct(m.present)}%</div>
+        <div class="sb-lbl">Attendance<br>Rate</div>
+      </div>
+      <div class="sum-box">
+        <div class="sb-val" style="color:#f43f5e">${pct(m.absent)}%</div>
+        <div class="sb-lbl">Absence<br>Rate</div>
+      </div>
+      <div class="sum-box">
+        <div class="sb-val" style="color:#f59e0b">${pct(m.leave)}%</div>
+        <div class="sb-lbl">Leave<br>Rate</div>
+      </div>
+    `;
+  }
+
+  // ── Side panel ──
+  function renderSidePanel(m) {
+    const panel = document.getElementById('sidePanel');
+    const total = m.days;
+    panel.innerHTML = CATEGORIES.map(cat => {
+      const val = m[cat.key];
+      const pct = ((val / total) * 100).toFixed(1);
+      return `
+        <div class="stat-card" style="border-color:${cat.color}22"
+             onmouseenter="hoverSlice(${CATEGORIES.indexOf(cat)})"
+             onmouseleave="unhoverSlice()">
+          <div class="stat-icon" style="background:${cat.bg}">${cat.icon}</div>
+          <div class="stat-body">
+            <div class="stat-label">${cat.label}</div>
+            <div class="stat-value">${val} <small style="font-size:0.95rem;font-weight:500;color:var(--muted)">days</small></div>
+            <div class="mini-bar">
+              <div class="mini-fill" style="width:0%;background:${cat.color}" data-w="${pct}"></div>
+            </div>
+          </div>
+          <div class="stat-badge" style="background:${cat.bg};color:${cat.color}">${pct}%</div>
+        </div>
+      `;
+    }).join('') + `
+      <div class="card" style="padding:1.1rem 1.25rem">
+        <div class="card-title" style="margin-bottom:0.75rem;font-size:0.85rem">📊 Quick Stats</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem">
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Working Days</span>
+            <strong>${m.days}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Effective Present</span>
+            <strong style="color:#22c55e">${m.present + m.late}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Sanctioned Leave</span>
+            <strong style="color:#f59e0b">${m.leave}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Unexcused Absence</span>
+            <strong style="color:#f43f5e">${m.absent}</strong>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0.25rem 0"></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Overall Grade</span>
+            <strong style="color:${m.present/m.days >= 0.75 ? '#22c55e' : '#f43f5e'}">
+              ${m.present/m.days >= 0.85 ? 'A' : m.present/m.days >= 0.75 ? 'B' : 'C'}
+              ${m.present/m.days >= 0.75 ? '✅' : '⚠️'}
+            </strong>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Animate mini bars
+    setTimeout(() => {
+      document.querySelectorAll('.mini-fill').forEach(el => {
+        el.style.width = el.dataset.w + '%';
+      });
+    }, 100);
+  }
+
+  // ── Switch month ──
+  function switchMonth(idx, btn) {
+    current = idx;
+    document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const m = months[idx];
+    document.getElementById('cardSub').textContent = `${m.name} 2025 · ${m.days} working days`;
+
+    buildSlices(m);
+    animateDraw();
+    resetCenter();
+    renderLegend(m);
+    renderSummaryRow(m);
+    renderSidePanel(m);
+  }
+
+  // ── Init ──
+  switchMonth(2, document.querySelectorAll('.month-btn')[2]);
+</script>
+</body>
+</html>

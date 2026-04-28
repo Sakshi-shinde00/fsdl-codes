@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Performance Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #0b0f1a;
+      --surface:  #111827;
+      --surface2: #1a2235;
+      --border:   #1f2d45;
+      --primary:  #38bdf8;
+      --green:    #34d399;
+      --yellow:   #fbbf24;
+      --red:      #f87171;
+      --purple:   #a78bfa;
+      --orange:   #fb923c;
+      --text:     #f0f6ff;
+      --muted:    #64748b;
+      --font:     'Outfit', sans-serif;
+      --mono:     'Space Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ── TOP HEADER ── */
+    .page-header {
+      max-width: 1200px;
+      margin: 0 auto 2.5rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .header-left h1 {
+      font-family: var(--mono);
+      font-size: 28px;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .header-left p { font-size: 14px; color: var(--muted); }
+
+    .student-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+    }
+
+    .student-selector label { font-size: 13px; color: var(--muted); }
+
+    .student-selector select {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--font);
+      cursor: pointer;
+    }
+
+    .student-selector select option { background: var(--surface); }
+
+    /* ── KPI CARDS ── */
+    .kpi-row {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .kpi:hover { border-color: var(--primary); }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .kpi.blue::before   { background: var(--primary); }
+    .kpi.green::before  { background: var(--green); }
+    .kpi.yellow::before { background: var(--yellow); }
+    .kpi.purple::before { background: var(--purple); }
+    .kpi.red::before    { background: var(--red); }
+
+    .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .kpi-value { font-family: var(--mono); font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .kpi.blue   .kpi-value { color: var(--primary); }
+    .kpi.green  .kpi-value { color: var(--green); }
+    .kpi.yellow .kpi-value { color: var(--yellow); }
+    .kpi.purple .kpi-value { color: var(--purple); }
+    .kpi.red    .kpi-value { color: var(--red); }
+    .kpi-sub { font-size: 12.5px; color: var(--muted); }
+    .kpi-icon { position: absolute; top: 1rem; right: 1rem; font-size: 22px; opacity: 0.55; }
+
+    /* ── CHART GRID ── */
+    .chart-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .chart-card.wide { grid-column: 1 / -1; }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .chart-subtitle {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    .canvas-wrap { position: relative; height: 260px; }
+    .canvas-wrap.tall { height: 300px; }
+
+    /* ── SUBJECT TABLE ── */
+    .subject-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .subject-table th {
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .subject-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(31,45,69,0.6);
+      color: var(--text);
+    }
+
+    .subject-table tr:last-child td { border-bottom: none; }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+
+    .grade-O  { background: rgba(52,211,153,0.15); color: var(--green); }
+    .grade-A  { background: rgba(56,189,248,0.15); color: var(--primary); }
+    .grade-B  { background: rgba(167,139,250,0.15); color: var(--purple); }
+    .grade-C  { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .grade-D  { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .bar-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bar-bg {
+      flex: 1;
+      height: 5px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill { height: 100%; border-radius: 999px; }
+
+    /* ── ATTENDANCE ROW ── */
+    .att-summary {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .att-item { text-align: center; }
+    .att-num  { font-family: var(--mono); font-size: 24px; font-weight: 700; }
+    .att-lbl  { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* ── FOOTER TAG ── */
+    .footer {
+      max-width: 1200px;
+      margin: 2rem auto 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 700px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-card.wide { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="header-left">
+    <h1>📊 Performance Dashboard</h1>
+    <p>Academic Year 2024–25 &nbsp;·&nbsp; Semester II &nbsp;·&nbsp; Computer Science</p>
+  </div>
+  <div class="student-selector">
+    <label>Student:</label>
+    <select id="studentSelect" onchange="switchStudent()">
+      <option value="0">Arjun Sharma</option>
+      <option value="1">Priya Patel</option>
+      <option value="2">Rohit Verma</option>
+      <option value="3">Sneha Kulkarni</option>
+    </select>
+  </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-row" id="kpiRow">
+  <div class="kpi blue">
+    <div class="kpi-icon">📈</div>
+    <div class="kpi-label">Overall Percentage</div>
+    <div class="kpi-value" id="kpi-pct">—</div>
+    <div class="kpi-sub" id="kpi-pct-sub">—</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-icon">🏫</div>
+    <div class="kpi-label">Attendance</div>
+    <div class="kpi-value" id="kpi-att">—</div>
+    <div class="kpi-sub" id="kpi-att-sub">—</div>
+  </div>
+  <div class="kpi yellow">
+    <div class="kpi-icon">⭐</div>
+    <div class="kpi-label">Best Subject</div>
+    <div class="kpi-value" id="kpi-best" style="font-size:18px;padding-top:6px">—</div>
+    <div class="kpi-sub" id="kpi-best-sub">—</div>
+  </div>
+  <div class="kpi purple">
+    <div class="kpi-icon">🎓</div>
+    <div class="kpi-label">CGPA</div>
+    <div class="kpi-value" id="kpi-cgpa">—</div>
+    <div class="kpi-sub">Out of 10.0</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-icon">⚠️</div>
+    <div class="kpi-label">Needs Attention</div>
+    <div class="kpi-value" id="kpi-weak" style="font-size:18px;padding-top:6px">—</div>
+    <div class="kpi-sub" id="kpi-weak-sub">—</div>
+  </div>
+</div>
+
+<!-- CHART GRID -->
+<div class="chart-grid">
+
+  <!-- Bar Chart: Subject Marks -->
+  <div class="chart-card">
+    <div class="chart-title">Marks by Subject</div>
+    <div class="chart-subtitle">Subject-wise Score (out of 100)</div>
+    <div class="canvas-wrap">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Radar Chart: Performance Profile -->
+  <div class="chart-card">
+    <div class="chart-title">Performance Radar</div>
+    <div class="chart-subtitle">Multi-dimensional Skill Profile</div>
+    <div class="canvas-wrap">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Line Chart: Monthly Progress -->
+  <div class="chart-card wide">
+    <div class="chart-title">Monthly Progress</div>
+    <div class="chart-subtitle">Score Trend across the Semester (Jan – Jun)</div>
+    <div class="canvas-wrap">
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Doughnut: Attendance -->
+  <div class="chart-card">
+    <div class="chart-title">Attendance Breakdown</div>
+    <div class="chart-subtitle">Present / Absent / Medical Leave</div>
+    <div class="att-summary" id="attSummary"></div>
+    <div class="canvas-wrap" style="height:200px">
+      <canvas id="doughnutChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Polar Area: Assignment Scores -->
+  <div class="chart-card">
+    <div class="chart-title">Assignment Scores</div>
+    <div class="chart-subtitle">Score per Assignment (out of 25)</div>
+    <div class="canvas-wrap">
+      <canvas id="polarChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Subject Table -->
+  <div class="chart-card wide">
+    <div class="chart-title">Detailed Subject Report</div>
+    <div class="chart-subtitle">Marks, Grade, and Performance Bar</div>
+    <table class="subject-table" id="subjectTable"></table>
+  </div>
+
+</div>
+
+<div class="footer">Data is illustrative for demonstration purposes. &nbsp;·&nbsp; Built with Chart.js</div>
+
+<script>
+/* ════════════════════════════════
+   STUDENT DATA
+════════════════════════════════ */
+var students = [
+  {
+    name: 'Arjun Sharma',
+    cgpa: 8.7,
+    attendance: { present: 102, absent: 12, medical: 6 },
+    subjects: [
+      { name:'Web Technology',    marks:88 },
+      { name:'Data Structures',   marks:76 },
+      { name:'DBMS',              marks:91 },
+      { name:'OS',                marks:72 },
+      { name:'Computer Networks', marks:84 },
+      { name:'Software Engg.',    marks:79 }
+    ],
+    radar:  [88, 76, 91, 84, 79, 72],
+    monthly:[62, 68, 74, 79, 83, 88],
+    assignments:[21, 18, 23, 19, 24, 17, 22]
+  },
+  {
+    name: 'Priya Patel',
+    cgpa: 9.2,
+    attendance: { present: 115, absent: 4, medical: 1 },
+    subjects: [
+      { name:'Web Technology',    marks:95 },
+      { name:'Data Structures',   marks:90 },
+      { name:'DBMS',              marks:93 },
+      { name:'OS',                marks:88 },
+      { name:'Computer Networks', marks:91 },
+      { name:'Software Engg.',    marks:94 }
+    ],
+    radar:  [95, 90, 93, 91, 94, 88],
+    monthly:[75, 80, 85, 88, 90, 94],
+    assignments:[25, 24, 23, 25, 22, 24, 25]
+  },
+  {
+    name: 'Rohit Verma',
+    cgpa: 6.8,
+    attendance: { present: 78, absent: 32, medical: 10 },
+    subjects: [
+      { name:'Web Technology',    marks:61 },
+      { name:'Data Structures',   marks:55 },
+      { name:'DBMS',              marks:70 },
+      { name:'OS',                marks:48 },
+      { name:'Computer Networks', marks:65 },
+      { name:'Software Engg.',    marks:58 }
+    ],
+    radar:  [61, 55, 70, 65, 58, 48],
+    monthly:[40, 45, 52, 58, 62, 65],
+    assignments:[14, 12, 18, 11, 16, 13, 15]
+  },
+  {
+    name: 'Sneha Kulkarni',
+    cgpa: 7.9,
+    attendance: { present: 108, absent: 8, medical: 4 },
+    subjects: [
+      { name:'Web Technology',    marks:82 },
+      { name:'Data Structures',   marks:68 },
+      { name:'DBMS',              marks:79 },
+      { name:'OS',                marks:75 },
+      { name:'Computer Networks', marks:73 },
+      { name:'Software Engg.',    marks:85 }
+    ],
+    radar:  [82, 68, 79, 73, 85, 75],
+    monthly:[55, 62, 67, 72, 76, 81],
+    assignments:[20, 17, 21, 19, 23, 18, 20]
+  }
+];
+
+var months = ['Jan','Feb','Mar','Apr','May','Jun'];
+var assignmentLabels = ['A1','A2','A3','A4','A5','A6','A7'];
+
+var barChart, radarChart, lineChart, doughnutChart, polarChart;
+
+/* ── Grade helper ── */
+function getGrade(m) {
+  if (m >= 90) return 'O';
+  if (m >= 80) return 'A';
+  if (m >= 70) return 'B';
+  if (m >= 60) return 'C';
+  return 'D';
+}
+
+function gradeColor(m) {
+  if (m >= 90) return 'var(--green)';
+  if (m >= 80) return 'var(--primary)';
+  if (m >= 70) return 'var(--purple)';
+  if (m >= 60) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+/* ── Chart defaults ── */
+Chart.defaults.color = '#64748b';
+Chart.defaults.font.family = 'Outfit';
+
+var gridColor = 'rgba(31,45,69,0.8)';
+
+function destroyAll() {
+  [barChart, radarChart, lineChart, doughnutChart, polarChart].forEach(function(c) {
+    if (c) c.destroy();
+  });
+}
+
+/* ══ MAIN RENDER ══ */
+function render(idx) {
+  var s = students[idx];
+  var marks  = s.subjects.map(function(x){ return x.marks; });
+  var labels = s.subjects.map(function(x){ return x.name; });
+  var avg    = Math.round(marks.reduce(function(a,b){return a+b;},0) / marks.length);
+  var best   = s.subjects.reduce(function(a,b){ return a.marks > b.marks ? a : b; });
+  var weak   = s.subjects.reduce(function(a,b){ return a.marks < b.marks ? a : b; });
+  var total  = s.attendance.present + s.attendance.absent + s.attendance.medical;
+  var attPct = Math.round((s.attendance.present / total) * 100);
+
+  // KPIs
+  document.getElementById('kpi-pct').textContent     = avg + '%';
+  document.getElementById('kpi-pct-sub').textContent = avg >= 75 ? '✅ Passing' : '⚠️ Below passing';
+  document.getElementById('kpi-att').textContent     = attPct + '%';
+  document.getElementById('kpi-att-sub').textContent = s.attendance.present + ' / ' + total + ' days';
+  document.getElementById('kpi-best').textContent    = best.name;
+  document.getElementById('kpi-best-sub').textContent = best.marks + ' marks';
+  document.getElementById('kpi-cgpa').textContent    = s.cgpa;
+  document.getElementById('kpi-weak').textContent    = weak.name;
+  document.getElementById('kpi-weak-sub').textContent = weak.marks + ' marks';
+
+  // Attendance summary
+  document.getElementById('attSummary').innerHTML =
+    '<div class="att-item"><div class="att-num" style="color:var(--green)">' + s.attendance.present + '</div><div class="att-lbl">Present</div></div>' +
+    '<div class="att-item"><div class="att-num" style="color:var(--red)">'   + s.attendance.absent  + '</div><div class="att-lbl">Absent</div></div>' +
+    '<div class="att-item"><div class="att-num" style="color:var(--yellow)">'+ s.attendance.medical + '</div><div class="att-lbl">Medical</div></div>' +
+    '<div class="att-item"><div class="att-num" style="color:var(--primary)">'+ attPct + '%</div><div class="att-lbl">Rate</div></div>';
+
+  // Subject table
+  var rows = s.subjects.map(function(sub) {
+    var g = getGrade(sub.marks);
+    var pct = sub.marks;
+    return '<tr>' +
+      '<td>' + sub.name + '</td>' +
+      '<td><span style="font-family:var(--mono);font-weight:700;">' + sub.marks + '</span> / 100</td>' +
+      '<td><span class="grade-badge grade-' + g + '">' + g + '</span></td>' +
+      '<td style="width:180px">' +
+        '<div class="bar-inline">' +
+          '<div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;background:' + gradeColor(sub.marks) + '"></div></div>' +
+          '<span style="font-size:12px;color:var(--muted);width:36px">' + pct + '%</span>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('subjectTable').innerHTML =
+    '<thead><tr><th>Subject</th><th>Marks</th><th>Grade</th><th>Progress</th></tr></thead><tbody>' + rows + '</tbody>';
+
+  destroyAll();
+
+  /* ── Bar Chart ── */
+  barChart = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Marks',
+        data: marks,
+        backgroundColor: marks.map(function(m){ return gradeColor(m).replace('var(','').replace(')',''); }).map(function(v){
+          var map = {'--green':'rgba(52,211,153,0.75)','--primary':'rgba(56,189,248,0.75)','--purple':'rgba(167,139,250,0.75)','--yellow':'rgba(251,191,36,0.75)','--red':'rgba(248,113,113,0.75)'};
+          return map[v] || 'rgba(56,189,248,0.75)';
+        }),
+        borderRadius: 7,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { font: { size: 11 }, maxRotation: 30 } },
+        y: { grid: { color: gridColor }, min: 0, max: 100, ticks: { stepSize: 20 } }
+      }
+    }
+  });
+
+  /* ── Radar Chart ── */
+  radarChart = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Web Tech','DS','DBMS','Networks','Soft. Engg.','OS'],
+      datasets: [{
+        label: s.name,
+        data: s.radar,
+        backgroundColor: 'rgba(56,189,248,0.15)',
+        borderColor: 'rgba(56,189,248,0.9)',
+        pointBackgroundColor: 'rgba(56,189,248,1)',
+        pointRadius: 4,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100, ticks: { stepSize: 25, backdropColor:'transparent', font:{size:10} },
+          grid: { color: gridColor },
+          pointLabels: { font: { size: 11 } }
+        }
+      }
+    }
+  });
+
+  /* ── Line Chart ── */
+  lineChart = new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Monthly Score',
+        data: s.monthly,
+        borderColor: 'rgba(52,211,153,1)',
+        backgroundColor: 'rgba(52,211,153,0.08)',
+        fill: true,
+        tension: 0.45,
+        pointBackgroundColor: 'rgba(52,211,153,1)',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor } },
+        y: { grid: { color: gridColor }, min: 0, max: 100, ticks: { stepSize: 20 } }
+      }
+    }
+  });
+
+  /* ── Doughnut Chart ── */
+  doughnutChart = new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Present','Absent','Medical'],
+      datasets: [{
+        data: [s.attendance.present, s.attendance.absent, s.attendance.medical],
+        backgroundColor: ['rgba(52,211,153,0.8)','rgba(248,113,113,0.8)','rgba(251,191,36,0.8)'],
+        borderColor: ['rgba(52,211,153,1)','rgba(248,113,113,1)','rgba(251,191,36,1)'],
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } }
+      }
+    }
+  });
+
+  /* ── Polar Area Chart ── */
+  polarChart = new Chart(document.getElementById('polarChart'), {
+    type: 'polarArea',
+    data: {
+      labels: assignmentLabels,
+      datasets: [{
+        data: s.assignments,
+        backgroundColor: [
+          'rgba(56,189,248,0.65)','rgba(52,211,153,0.65)','rgba(167,139,250,0.65)',
+          'rgba(251,191,36,0.65)','rgba(248,113,113,0.65)','rgba(251,146,60,0.65)',
+          'rgba(99,102,241,0.65)'
+        ],
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { font:{size:11}, padding:10 } } },
+      scales: {
+        r: {
+          min: 0, max: 25, ticks: { stepSize: 5, backdropColor:'transparent', font:{size:10} },
+          grid: { color: gridColor }
+        }
+      }
+    }
+  });
+}
+
+function switchStudent() {
+  var idx = parseInt(document.getElementById('studentSelect').value);
+  render(idx);
+}
+
+render(0);
+</script>
+
+</body>
+</html>

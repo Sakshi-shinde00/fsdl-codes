@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stopwatch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Nunito:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:radial-gradient(circle at center,#1a1a2e 0%,#0d0d1a 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;}
+  .watch{text-align:center;padding:2rem;}
+  h1{color:#e2e8f0;font-size:1.5rem;font-weight:700;margin-bottom:3rem;letter-spacing:.2em;text-transform:uppercase;opacity:.6;}
+  .ring-wrap{position:relative;width:280px;height:280px;margin:0 auto 2.5rem;}
+  svg{position:absolute;inset:0;transform:rotate(-90deg);}
+  circle.track{fill:none;stroke:#ffffff10;stroke-width:8;}
+  circle.prog{fill:none;stroke:url(#grad);stroke-width:8;stroke-linecap:round;stroke-dasharray:754;stroke-dashoffset:754;transition:stroke-dashoffset .1s linear;}
+  .time-display{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .time{font-family:'Share Tech Mono',monospace;font-size:3rem;color:#fff;letter-spacing:.05em;}
+  .ms{font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:#a78bfa;letter-spacing:.05em;}
+  .status{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#64748b;margin-top:.3rem;}
+  .btns{display:flex;gap:1rem;justify-content:center;margin-bottom:2rem;}
+  button{padding:.85rem 2rem;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;min-width:110px;}
+  #btnStart{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;}
+  #btnStart:hover{filter:brightness(1.1);}
+  #btnStop{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;}
+  #btnStop:hover{filter:brightness(1.1);}
+  #btnReset{background:#1e2035;color:#94a3b8;border:1.5px solid #2d3148;}
+  #btnReset:hover{border-color:#6366f1;color:#a78bfa;}
+  #btnLap{background:#1e2035;color:#94a3b8;border:1.5px solid #2d3148;}
+  #btnLap:hover{border-color:#a78bfa;color:#a78bfa;}
+  .laps{max-height:200px;overflow-y:auto;width:100%;max-width:340px;margin:0 auto;}
+  .lap-item{display:flex;justify-content:space-between;padding:.5rem .8rem;border-radius:8px;font-size:.85rem;font-family:'Share Tech Mono',monospace;}
+  .lap-item:nth-child(odd){background:#ffffff05;}
+  .lap-num{color:#64748b;}
+  .lap-time{color:#a78bfa;}
+  .lap-delta{color:#38bdf8;}
+</style>
+</head>
+<body>
+<div class="watch">
+  <h1>⏱ Stopwatch</h1>
+  <div class="ring-wrap">
+    <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+      <circle class="track" cx="140" cy="140" r="120"/>
+      <circle class="prog" id="prog" cx="140" cy="140" r="120"/>
+    </svg>
+    <div class="time-display">
+      <div class="time" id="timeDisplay">00:00</div>
+      <div class="ms" id="msDisplay">.000</div>
+      <div class="status" id="status">Ready</div>
+    </div>
+  </div>
+  <div class="btns">
+    <button id="btnStart" onclick="startStop()">▶ Start</button>
+    <button id="btnStop" onclick="stopWatch()" style="display:none">⏸ Stop</button>
+    <button id="btnReset" onclick="resetWatch()">↺ Reset</button>
+    <button id="btnLap" onclick="addLap()">⊕ Lap</button>
+  </div>
+  <div class="laps" id="laps"></div>
+</div>
+<script>
+let startTime=0,elapsed=0,timer=null,running=false,laps=[],lastLap=0;
+
+function pad(n,l=2){return String(Math.floor(n)).padStart(l,'0');}
+
+function formatTime(ms){
+  const m=Math.floor(ms/60000);
+  const s=Math.floor((ms%60000)/1000);
+  const cs=Math.floor((ms%1000));
+  return{main:pad(m)+':'+pad(s),ms:'.'+String(cs).padStart(3,'0')};
+}
+
+function tick(){
+  elapsed=Date.now()-startTime;
+  const {main,ms}=formatTime(elapsed);
+  document.getElementById('timeDisplay').textContent=main;
+  document.getElementById('msDisplay').textContent=ms;
+  // Ring: 60s cycle
+  const sec=elapsed/1000%60;
+  const offset=754-(754*sec/60);
+  document.getElementById('prog').style.strokeDashoffset=offset;
+}
+
+function startStop(){
+  if(!running){
+    startTime=Date.now()-elapsed;
+    timer=setInterval(tick,33);
+    running=true;
+    document.getElementById('btnStart').style.display='none';
+    document.getElementById('btnStop').style.display='inline-block';
+    document.getElementById('status').textContent='Running';
+  }
+}
+function stopWatch(){
+  clearInterval(timer);running=false;
+  document.getElementById('btnStart').style.display='inline-block';
+  document.getElementById('btnStop').style.display='none';
+  document.getElementById('status').textContent='Paused';
+}
+function resetWatch(){
+  clearInterval(timer);running=false;elapsed=0;laps=[];lastLap=0;
+  document.getElementById('timeDisplay').textContent='00:00';
+  document.getElementById('msDisplay').textContent='.000';
+  document.getElementById('prog').style.strokeDashoffset=754;
+  document.getElementById('status').textContent='Ready';
+  document.getElementById('btnStart').style.display='inline-block';
+  document.getElementById('btnStop').style.display='none';
+  document.getElementById('laps').innerHTML='';
+}
+function addLap(){
+  if(!running)return;
+  const lapTime=elapsed;
+  const delta=lapTime-lastLap;
+  lastLap=lapTime;
+  laps.unshift({n:laps.length+1,time:lapTime,delta});
+  const el=document.getElementById('laps');
+  el.innerHTML=laps.map(l=>`<div class="lap-item"><span class="lap-num">Lap ${l.n}</span><span class="lap-delta">+${formatTime(l.delta).main}${formatTime(l.delta).ms}</span><span class="lap-time">${formatTime(l.time).main}${formatTime(l.time).ms}</span></div>`).join('');
+}
+</script>
+</body>
+</html>

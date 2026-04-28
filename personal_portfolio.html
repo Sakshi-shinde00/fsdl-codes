@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aryan Desai — Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --surface: #16161d;
+      --card: #1e1e28;
+      --primary: #7c3aed;
+      --glow: #a78bfa;
+      --accent: #f59e0b;
+      --text: #f5f5f7;
+      --muted: #9ca3af;
+      --border: #2d2d3a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 999;
+      background: rgba(15,15,19,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 60px; height: 64px;
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--glow); letter-spacing: -0.5px; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(124,58,237,0.2);
+      color: var(--glow);
+      border: 1px solid rgba(124,58,237,0.4);
+      padding: 6px 18px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -1px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub { color: var(--muted); font-size: 1.1rem; margin-top: 16px; max-width: 520px; line-height: 1.7; margin-left: auto; margin-right: auto; }
+    .hero-btns { display: flex; gap: 16px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--primary); color: white;
+      padding: 13px 30px; border-radius: 8px; text-decoration: none;
+      font-weight: 600; font-size: 0.9rem; transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(124,58,237,0.3);
+    }
+    .btn-primary:hover { background: #6d28d9; transform: translateY(-2px); box-shadow: 0 0 30px rgba(124,58,237,0.5); }
+    .btn-outline {
+      border: 1px solid var(--border); color: var(--text);
+      padding: 13px 30px; border-radius: 8px; text-decoration: none;
+      font-weight: 600; font-size: 0.9rem; transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--glow); }
+
+    /* SECTIONS */
+    section { padding: 90px 60px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--primary); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+      letter-spacing: -0.5px; margin-bottom: 50px;
+    }
+    .section-title span { color: var(--glow); }
+    .divider { border: none; border-top: 1px solid var(--border); max-width: 1100px; margin: 0 auto; }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .about-avatar {
+      width: 100%; max-width: 360px; aspect-ratio: 1;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--glow));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7rem;
+      box-shadow: 0 0 60px rgba(124,58,237,0.3);
+    }
+    .about-text p { color: var(--muted); line-height: 1.8; font-size: 1rem; margin-bottom: 20px; }
+    .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+      text-align: center;
+    }
+    .stat-card .num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--glow); }
+    .stat-card .label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+    /* SKILLS */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .skill-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .skill-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 0 20px rgba(124,58,237,0.15); }
+    .skill-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .skill-name { font-weight: 700; font-size: 0.95rem; }
+    .skill-pct { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--glow); }
+    .skill-bar-bg { background: var(--border); border-radius: 6px; height: 7px; overflow: hidden; }
+    .skill-bar-fill {
+      height: 100%; border-radius: 6px;
+      background: linear-gradient(90deg, var(--primary), var(--glow));
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    }
+    .skill-icon { font-size: 1.5rem; margin-bottom: 10px; }
+
+    /* PROJECTS */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+    .project-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .project-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+    .project-banner {
+      height: 140px; display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+    }
+    .project-body { padding: 22px; }
+    .project-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .project-tag {
+      background: rgba(124,58,237,0.15); color: var(--glow);
+      font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; letter-spacing: 0.3px;
+    }
+    .project-body h4 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
+    .project-body p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+    .project-links { display: flex; gap: 12px; margin-top: 18px; }
+    .proj-link {
+      font-size: 0.8rem; font-weight: 700; color: var(--glow);
+      text-decoration: none; display: flex; align-items: center; gap: 5px;
+    }
+    .proj-link:hover { text-decoration: underline; }
+
+    /* CONTACT */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+    .contact-info h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; }
+    .contact-info p { color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+    .contact-detail { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 0.9rem; }
+    .contact-detail .icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(124,58,237,0.15); display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .contact-form { display: flex; flex-direction: column; gap: 16px; }
+    .contact-form input, .contact-form textarea {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 13px 16px;
+      color: var(--text); font-family: inherit; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .contact-form input:focus, .contact-form textarea:focus { border-color: var(--primary); }
+    .contact-form textarea { min-height: 120px; resize: vertical; }
+    .contact-form button {
+      background: var(--primary); color: white;
+      border: none; padding: 13px; border-radius: 10px;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .contact-form button:hover { background: #6d28d9; transform: translateY(-2px); }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 30px;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Aryan.dev</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-tag">Available for internship</div>
+      <h1>Hi, I'm <span>Aryan Desai</span></h1>
+      <p class="hero-sub">Full Stack Developer & UI Designer crafting clean, modern web experiences with React, Node.js & MongoDB.</p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn-primary">View My Work</a>
+        <a href="#contact" class="btn-outline">Contact Me</a>
+      </div>
+    </div>
+  </div>
+  <hr class="divider"/>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label">01 — About</div>
+    <div class="section-title">Who I <span>Am</span></div>
+    <div class="about-grid">
+      <div class="about-avatar">👨‍💻</div>
+      <div class="about-text">
+        <p>I'm a second-year Computer Engineering student passionate about building full-stack web applications. I love turning complex problems into elegant, user-friendly solutions using modern technologies.</p>
+        <p>When I'm not coding, I enjoy competitive programming, contributing to open source, and exploring UI design trends.</p>
+        <div class="about-stats">
+          <div class="stat-card"><div class="num">15+</div><div class="label">Projects Built</div></div>
+          <div class="stat-card"><div class="num">8+</div><div class="label">Technologies</div></div>
+          <div class="stat-card"><div class="num">2</div><div class="label">Years Learning</div></div>
+          <div class="stat-card"><div class="num">3</div><div class="label">Hackathons</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr class="divider"/>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-label">02 — Skills</div>
+    <div class="section-title">My <span>Expertise</span></div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-top"><span class="skill-name">HTML & CSS</span><span class="skill-pct">95%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:95%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-top"><span class="skill-name">JavaScript</span><span class="skill-pct">85%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:85%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚛️</div>
+        <div class="skill-top"><span class="skill-name">React.js</span><span class="skill-pct">78%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:78%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🟢</div>
+        <div class="skill-top"><span class="skill-name">Node.js & Express</span><span class="skill-pct">72%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:72%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🍃</div>
+        <div class="skill-top"><span class="skill-name">MongoDB</span><span class="skill-pct">68%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:68%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🐍</div>
+        <div class="skill-top"><span class="skill-name">Python</span><span class="skill-pct">60%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:60%"></div></div>
+      </div>
+    </div>
+  </section>
+  <hr class="divider"/>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-label">03 — Projects</div>
+    <div class="section-title">My <span>Work</span></div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#1e1e28,#2d1b69);">🛒</div>
+        <div class="project-body">
+          <div class="project-tags"><span class="project-tag">React</span><span class="project-tag">Node.js</span><span class="project-tag">MongoDB</span></div>
+          <h4>E-Commerce Platform</h4>
+          <p>Full-stack shopping app with authentication, cart management, order tracking, and payment integration.</p>
+          <div class="project-links">
+            <a class="proj-link" href="#">🔗 Live Demo</a>
+            <a class="proj-link" href="#">📁 GitHub</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#1e2828,#064e3b);">📋</div>
+        <div class="project-body">
+          <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span></div>
+          <h4>Task Management App</h4>
+          <p>Drag-and-drop kanban board with local storage persistence, deadlines, and priority labels.</p>
+          <div class="project-links">
+            <a class="proj-link" href="#">🔗 Live Demo</a>
+            <a class="proj-link" href="#">📁 GitHub</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-banner" style="background:linear-gradient(135deg,#2d1b00,#92400e);">📊</div>
+        <div class="project-body">
+          <div class="project-tags"><span class="project-tag">Chart.js</span><span class="project-tag">API</span><span class="project-tag">CSS</span></div>
+          <h4>Weather Dashboard</h4>
+          <p>Real-time weather app with charts, 7-day forecast, and location-based data from OpenWeather API.</p>
+          <div class="project-links">
+            <a class="proj-link" href="#">🔗 Live Demo</a>
+            <a class="proj-link" href="#">📁 GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr class="divider"/>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label">04 — Contact</div>
+    <div class="section-title">Get In <span>Touch</span></div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Let's work together</h3>
+        <p>I'm open to internships, freelance projects, and collaboration opportunities. Feel free to reach out!</p>
+        <div class="contact-detail"><div class="icon">📧</div> aryan.desai@email.com</div>
+        <div class="contact-detail"><div class="icon">📱</div> +91 98765 43210</div>
+        <div class="contact-detail"><div class="icon">📍</div> Pune, Maharashtra, India</div>
+        <div class="contact-detail"><div class="icon">💼</div> linkedin.com/in/aryandesai</div>
+      </div>
+      <div>
+        <div class="contact-form">
+          <input type="text" placeholder="Your Name"/>
+          <input type="email" placeholder="Your Email"/>
+          <input type="text" placeholder="Subject"/>
+          <textarea placeholder="Your Message..."></textarea>
+          <button onclick="alert('Message sent! Thank you 🎉')">Send Message →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Designed & Built by <strong>Aryan Desai</strong> · © 2025</p>
+  </footer>
+
+</body>
+</html>

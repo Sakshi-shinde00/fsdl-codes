@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#f1f5f9;font-family:'Nunito',sans-serif;padding:2rem;}
+  h1{text-align:center;font-size:2rem;font-weight:800;color:#1e293b;margin-bottom:2rem;}
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:2rem;max-width:1000px;margin:0 auto;}
+  @media(max-width:768px){.layout{grid-template-columns:1fr;}}
+  .section-title{font-size:1rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;}
+  /* Products */
+  .products{display:flex;flex-direction:column;gap:.8rem;}
+  .product{background:#fff;border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 8px #0001;}
+  .prod-emoji{font-size:2rem;}
+  .prod-info{flex:1;}
+  .prod-name{font-weight:700;color:#1e293b;font-size:.95rem;}
+  .prod-price{color:#6366f1;font-weight:700;font-size:.9rem;}
+  .add-btn{background:#6366f1;color:#fff;border:none;padding:.45rem 1rem;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:.85rem;transition:background .2s;}
+  .add-btn:hover{background:#4f46e5;}
+  /* Cart */
+  .cart-panel{background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 4px 20px #0002;position:sticky;top:2rem;height:fit-content;}
+  .cart-panel h2{font-size:1.2rem;font-weight:800;margin-bottom:1.2rem;color:#1e293b;}
+  .cart-items{display:flex;flex-direction:column;gap:.7rem;min-height:80px;}
+  .cart-item{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;background:#f8fafc;border-radius:10px;}
+  .ci-name{flex:1;font-size:.88rem;font-weight:600;color:#1e293b;}
+  .qty-ctrl{display:flex;align-items:center;gap:.5rem;}
+  .qty-btn{width:26px;height:26px;border-radius:6px;border:none;background:#e2e8f0;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .qty-btn:hover{background:#c7d2fe;}
+  .qty-val{font-weight:700;font-size:.9rem;min-width:20px;text-align:center;}
+  .ci-price{font-size:.88rem;font-weight:700;color:#6366f1;min-width:60px;text-align:right;}
+  .empty-cart{text-align:center;color:#94a3b8;font-size:.9rem;padding:1.5rem 0;}
+  hr{border:none;border-top:1.5px solid #e2e8f0;margin:1rem 0;}
+  .summary-row{display:flex;justify-content:space-between;font-size:.9rem;color:#64748b;margin-bottom:.4rem;}
+  .total-row{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:800;color:#1e293b;margin-top:.5rem;}
+  .checkout-btn{width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;padding:.85rem;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;margin-top:1.2rem;transition:opacity .2s;}
+  .checkout-btn:hover{opacity:.9;}
+</style>
+</head>
+<body>
+<h1>🛒 Shopping Cart</h1>
+<div class="layout">
+  <div>
+    <div class="section-title">Products</div>
+    <div class="products" id="productList"></div>
+  </div>
+  <div class="cart-panel">
+    <h2>Your Cart <span id="cartBadge" style="background:#6366f1;color:#fff;font-size:.7rem;padding:.15rem .5rem;border-radius:99px;"></span></h2>
+    <div class="cart-items" id="cartItems"><div class="empty-cart">Your cart is empty 🛍️</div></div>
+    <hr>
+    <div class="summary-row"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+    <div class="summary-row"><span>Shipping</span><span id="shipping">₹0.00</span></div>
+    <div class="total-row"><span>Total</span><span id="total">₹0.00</span></div>
+    <button class="checkout-btn" onclick="checkout()">Proceed to Checkout →</button>
+  </div>
+</div>
+<script>
+const products=[
+  {id:1,emoji:"💻",name:"Laptop Stand",price:999},
+  {id:2,emoji:"🖱️",name:"Wireless Mouse",price:599},
+  {id:3,emoji:"⌨️",name:"Mechanical Keyboard",price:2499},
+  {id:4,emoji:"🎧",name:"Noise Cancelling Headphones",price:3499},
+  {id:5,emoji:"📱",name:"Phone Holder",price:299},
+  {id:6,emoji:"🔌",name:"USB-C Hub",price:1199},
+];
+
+let cart={};
+
+function renderProducts(){
+  document.getElementById('productList').innerHTML=products.map(p=>`
+    <div class="product">
+      <span class="prod-emoji">${p.emoji}</span>
+      <div class="prod-info"><div class="prod-name">${p.name}</div><div class="prod-price">₹${p.price}</div></div>
+      <button class="add-btn" onclick="addToCart(${p.id})">+ Add</button>
+    </div>`).join('');
+}
+
+function addToCart(id){
+  cart[id]=(cart[id]||0)+1;
+  renderCart();
+}
+
+function changeQty(id,delta){
+  cart[id]=(cart[id]||0)+delta;
+  if(cart[id]<=0)delete cart[id];
+  renderCart();
+}
+
+function renderCart(){
+  const keys=Object.keys(cart);
+  const el=document.getElementById('cartItems');
+  document.getElementById('cartBadge').textContent=keys.length?keys.reduce((a,k)=>a+cart[k],0):'';
+  if(!keys.length){el.innerHTML='<div class="empty-cart">Your cart is empty 🛍️</div>';updateTotals(0);return;}
+  el.innerHTML=keys.map(id=>{
+    const p=products.find(x=>x.id==id);
+    return `<div class="cart-item">
+      <span>${p.emoji}</span>
+      <span class="ci-name">${p.name}</span>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+        <span class="qty-val">${cart[id]}</span>
+        <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+      </div>
+      <span class="ci-price">₹${p.price*cart[id]}</span>
+    </div>`;
+  }).join('');
+  const subtotal=keys.reduce((a,id)=>{const p=products.find(x=>x.id==id);return a+p.price*cart[id];},0);
+  updateTotals(subtotal);
+}
+
+function updateTotals(sub){
+  const ship=sub>0?99:0;
+  document.getElementById('subtotal').textContent='₹'+sub;
+  document.getElementById('shipping').textContent='₹'+ship;
+  document.getElementById('total').textContent='₹'+(sub+ship);
+}
+
+function checkout(){
+  if(!Object.keys(cart).length){alert('Your cart is empty!');return;}
+  alert('✅ Order placed successfully! Thank you for shopping.');
+  cart={};renderCart();
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>

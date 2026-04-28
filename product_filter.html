@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Filtering System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#f8fafc;font-family:'Urbanist',sans-serif;padding:2rem;}
+  h1{text-align:center;font-size:2.2rem;font-weight:800;color:#0f172a;margin-bottom:.5rem;}
+  p.sub{text-align:center;color:#94a3b8;margin-bottom:2rem;}
+  .filters{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-bottom:2rem;}
+  .filter-pill{padding:.5rem 1.2rem;border-radius:99px;border:2px solid #e2e8f0;background:#fff;font-family:'Urbanist',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;color:#64748b;}
+  .filter-pill:hover{border-color:#6366f1;color:#6366f1;}
+  .filter-pill.active{background:#6366f1;border-color:#6366f1;color:#fff;}
+  .results-count{text-align:center;font-size:.85rem;color:#94a3b8;margin-bottom:1.5rem;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;}
+  .card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px #0001;transition:transform .25s,opacity .3s;}
+  .card:hover{transform:translateY(-4px);box-shadow:0 10px 30px #0002;}
+  .card.hidden{display:none;}
+  .card-top{height:140px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;}
+  .card-body{padding:1rem;}
+  .cat-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+  .card-name{font-size:.95rem;font-weight:700;color:#1e293b;margin-bottom:.3rem;}
+  .card-price{font-size:1.1rem;font-weight:800;color:#6366f1;}
+  .card-rating{font-size:.78rem;color:#f59e0b;margin-top:.3rem;}
+  /* Category colors */
+  .bg-electronics{background:#eff6ff;}.cat-electronics{color:#3b82f6;}
+  .bg-fashion{background:#fdf4ff;}.cat-fashion{color:#a855f7;}
+  .bg-sports{background:#f0fdf4;}.cat-sports{color:#22c55e;}
+  .bg-home{background:#fffbeb;}.cat-home{color:#f59e0b;}
+  .bg-books{background:#fff1f2;}.cat-books{color:#ef4444;}
+</style>
+</head>
+<body>
+<h1>🔍 Product Filter</h1>
+<p class="sub">Filter products by category</p>
+<div class="filters" id="filters"></div>
+<div class="results-count" id="count"></div>
+<div class="grid" id="grid"></div>
+<script>
+const products=[
+  {id:1,name:"Wireless Earbuds",cat:"Electronics",price:"₹2,499",emoji:"🎧",rating:"★★★★★"},
+  {id:2,name:"Smartwatch",cat:"Electronics",price:"₹4,999",emoji:"⌚",rating:"★★★★☆"},
+  {id:3,name:"USB-C Hub",cat:"Electronics",price:"₹1,299",emoji:"🔌",rating:"★★★★★"},
+  {id:4,name:"Running Shoes",cat:"Sports",price:"₹1,999",emoji:"👟",rating:"★★★★☆"},
+  {id:5,name:"Yoga Mat",cat:"Sports",price:"₹699",emoji:"🧘",rating:"★★★★★"},
+  {id:6,name:"Water Bottle",cat:"Sports",price:"₹399",emoji:"🥤",rating:"★★★☆☆"},
+  {id:7,name:"Cotton T-Shirt",cat:"Fashion",price:"₹499",emoji:"👕",rating:"★★★★☆"},
+  {id:8,name:"Denim Jacket",cat:"Fashion",price:"₹1,799",emoji:"🧥",rating:"★★★★★"},
+  {id:9,name:"Sneakers",cat:"Fashion",price:"₹2,299",emoji:"👞",rating:"★★★★☆"},
+  {id:10,name:"Desk Lamp",cat:"Home",price:"₹799",emoji:"💡",rating:"★★★★★"},
+  {id:11,name:"Air Purifier",cat:"Home",price:"₹3,499",emoji:"💨",rating:"★★★★☆"},
+  {id:12,name:"Coffee Mug",cat:"Home",price:"₹299",emoji:"☕",rating:"★★★★★"},
+  {id:13,name:"JavaScript Guide",cat:"Books",price:"₹549",emoji:"📗",rating:"★★★★★"},
+  {id:14,name:"Web Design 101",cat:"Books",price:"₹399",emoji:"📘",rating:"★★★★☆"},
+  {id:15,name:"Node.js Handbook",cat:"Books",price:"₹479",emoji:"📙",rating:"★★★★★"},
+];
+
+const categories=['All',...new Set(products.map(p=>p.cat))];
+let active='All';
+
+function renderFilters(){
+  document.getElementById('filters').innerHTML=categories.map(c=>`<button class="filter-pill${c===active?' active':''}" onclick="setFilter('${c}')">${c}</button>`).join('');
+}
+
+function renderGrid(){
+  const filtered=active==='All'?products:products.filter(p=>p.cat===active);
+  document.getElementById('count').textContent=`Showing ${filtered.length} of ${products.length} products`;
+  document.getElementById('grid').innerHTML=filtered.map(p=>`
+    <div class="card">
+      <div class="card-top bg-${p.cat.toLowerCase()}">${p.emoji}</div>
+      <div class="card-body">
+        <div class="cat-label cat-${p.cat.toLowerCase()}">${p.cat}</div>
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">${p.price}</div>
+        <div class="card-rating">${p.rating}</div>
+      </div>
+    </div>`).join('');
+}
+
+function setFilter(cat){
+  active=cat;
+  renderFilters();
+  renderGrid();
+}
+
+renderFilters();
+renderGrid();
+</script>
+</body>
+</html>

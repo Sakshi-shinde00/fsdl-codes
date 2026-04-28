@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Application</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(135deg,#1e3a5f,#0f2027);min-height:100vh;font-family:'Poppins',sans-serif;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  .quiz-box{background:#fff;border-radius:24px;padding:2.5rem;width:100%;max-width:580px;box-shadow:0 30px 80px #0006;}
+  .progress-bar{height:6px;background:#e2e8f0;border-radius:99px;margin-bottom:2rem;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#a78bfa);border-radius:99px;transition:width .4s ease;}
+  .q-counter{font-size:.8rem;font-weight:600;color:#94a3b8;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;}
+  .q-text{font-size:1.2rem;font-weight:700;color:#1e293b;margin-bottom:1.8rem;line-height:1.5;}
+  .options{display:flex;flex-direction:column;gap:.7rem;margin-bottom:2rem;}
+  .option{padding:1rem 1.2rem;border:2px solid #e2e8f0;border-radius:14px;cursor:pointer;font-size:.92rem;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:.8rem;color:#374151;}
+  .option:hover:not(.locked){border-color:#a5b4fc;background:#f5f3ff;}
+  .option.correct{background:#f0fdf4;border-color:#22c55e;color:#16a34a;}
+  .option.wrong{background:#fef2f2;border-color:#ef4444;color:#dc2626;}
+  .option.locked{cursor:default;}
+  .opt-icon{width:24px;height:24px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;transition:.2s;}
+  .option.correct .opt-icon{background:#22c55e;border-color:#22c55e;color:#fff;}
+  .option.wrong .opt-icon{background:#ef4444;border-color:#ef4444;color:#fff;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;}
+  .next-btn{background:#6366f1;color:#fff;border:none;padding:.75rem 2rem;border-radius:12px;font-family:'Poppins',sans-serif;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .2s;}
+  .next-btn:hover{background:#4f46e5;}
+  .next-btn:disabled{background:#e2e8f0;color:#94a3b8;cursor:default;}
+  .score-screen{text-align:center;}
+  .big-score{font-size:5rem;font-weight:800;color:#6366f1;line-height:1;}
+  .score-msg{font-size:1.2rem;font-weight:600;color:#1e293b;margin-top:1rem;margin-bottom:.5rem;}
+  .score-sub{color:#64748b;font-size:.9rem;margin-bottom:2rem;}
+  .retry-btn{background:linear-gradient(135deg,#6366f1,#a78bfa);color:#fff;border:none;padding:.9rem 2.5rem;border-radius:14px;font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="quiz-box" id="quizBox">
+  <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+  <div id="quizContent"></div>
+</div>
+<script>
+const questions=[
+  {q:"What does HTML stand for?",opts:["HyperText Markup Language","HighText Machine Language","Hyperlink and Text Markup Language","HyperText Making Language"],ans:0},
+  {q:"Which CSS property controls text color?",opts:["font-color","text-color","color","background-color"],ans:2},
+  {q:"Which JavaScript method adds an element to the end of an array?",opts:["append()","push()","add()","insert()"],ans:1},
+  {q:"What does DOM stand for?",opts:["Document Object Model","Data Object Module","Display Output Model","Document Order Markup"],ans:0},
+  {q:"Which tag is used for JavaScript in HTML?",opts:["<js>","<javascript>","<script>","<code>"],ans:2},
+  {q:"What does CSS stand for?",opts:["Creative Style Sheets","Computer Style Sheets","Cascading Style Sheets","Colorful Style Sheets"],ans:2},
+  {q:"Which MongoDB method inserts a document?",opts:["db.insert()","db.collection.insertOne()","db.add()","db.save()"],ans:1},
+  {q:"What is localStorage used for?",opts:["Server storage","Session data only","Persistent client-side storage","Database queries"],ans:2},
+  {q:"Which operator is used for strict equality in JavaScript?",opts:["==","=","===","!=="],ans:2},
+  {q:"What does JSON stand for?",opts:["Java Serialized Object Notation","JavaScript Object Notation","Java Standard Output Notation","JavaScript Ordered Notation"],ans:1},
+];
+
+let current=0,score=0,selected=null;
+
+function render(){
+  const q=questions[current];
+  document.getElementById('progFill').style.width=((current)/questions.length*100)+'%';
+  document.getElementById('quizContent').innerHTML=`
+    <div class="q-counter">Question ${current+1} of ${questions.length}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">${q.opts.map((o,i)=>`<div class="option" id="opt${i}" onclick="select(${i})"><span class="opt-icon" id="icon${i}">${String.fromCharCode(65+i)}</span>${o}</div>`).join('')}</div>
+    <div class="nav-row"><span style="font-size:.85rem;color:#94a3b8;">Score: ${score}/${current}</span><button class="next-btn" id="nextBtn" onclick="next()" disabled>${current===questions.length-1?'Finish':'Next →'}</button></div>`;
+}
+
+function select(idx){
+  if(selected!==null)return;
+  selected=idx;
+  const q=questions[current];
+  for(let i=0;i<q.opts.length;i++){
+    const el=document.getElementById('opt'+i);
+    el.classList.add('locked');
+    if(i===q.ans) el.classList.add('correct');
+    else if(i===idx) el.classList.add('wrong');
+    document.getElementById('icon'+i).textContent=i===q.ans?'✓':i===idx?'✗':String.fromCharCode(65+i);
+  }
+  if(idx===q.ans) score++;
+  document.getElementById('nextBtn').disabled=false;
+}
+
+function next(){
+  selected=null;
+  current++;
+  if(current===questions.length){showScore();}
+  else render();
+}
+
+function showScore(){
+  document.getElementById('progFill').style.width='100%';
+  const pct=Math.round(score/questions.length*100);
+  const msgs=[{p:0,m:"Keep Studying! 📖",s:"Review the material and try again."},{p:50,m:"Not Bad! 😊",s:"You're on the right track."},{p:70,m:"Great Job! 🎉",s:"You know your stuff!"},{p:90,m:"Outstanding! 🏆",s:"Nearly perfect score!"}];
+  const msg=msgs.filter(m=>pct>=m.p).pop();
+  document.getElementById('quizContent').innerHTML=`
+    <div class="score-screen">
+      <div class="big-score">${score}<span style="font-size:2rem;color:#94a3b8;">/${questions.length}</span></div>
+      <div class="score-msg">${msg.m}</div>
+      <div class="score-sub">${msg.s} Score: ${pct}%</div>
+      <button class="retry-btn" onclick="restart()">🔄 Try Again</button>
+    </div>`;
+}
+
+function restart(){current=0;score=0;selected=null;render();}
+render();
+</script>
+</body>
+</html>

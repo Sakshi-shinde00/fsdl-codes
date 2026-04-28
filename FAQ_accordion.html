@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ Accordion</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(160deg,#f0f9ff,#e0f2fe);min-height:100vh;font-family:'Poppins',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+  h1{font-size:2.2rem;font-weight:700;color:#0c4a6e;margin-bottom:.5rem;text-align:center;}
+  p.sub{color:#0ea5e9;margin-bottom:2.5rem;font-size:.95rem;text-align:center;}
+  .faq-wrap{width:100%;max-width:700px;display:flex;flex-direction:column;gap:.8rem;}
+  .faq-item{background:#fff;border-radius:14px;box-shadow:0 2px 10px #0ea5e915;overflow:hidden;border:1.5px solid transparent;transition:border .3s;}
+  .faq-item.open{border-color:#0ea5e9;}
+  .faq-q{display:flex;justify-content:space-between;align-items:center;padding:1.2rem 1.5rem;cursor:pointer;font-weight:600;font-size:.95rem;color:#0c4a6e;gap:1rem;}
+  .faq-q:hover{background:#f0f9ff;}
+  .icon{width:28px;height:28px;border-radius:50%;background:#e0f2fe;color:#0ea5e9;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:transform .3s,background .3s;}
+  .faq-item.open .icon{transform:rotate(45deg);background:#0ea5e9;color:#fff;}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;}
+  .faq-a.open{max-height:400px;padding:0 1.5rem 1.2rem;}
+  .faq-a p{font-size:.88rem;color:#475569;line-height:1.7;}
+</style>
+</head>
+<body>
+<h1>Frequently Asked Questions</h1>
+<p class="sub">Click any question to expand the answer</p>
+<div class="faq-wrap" id="faqWrap"></div>
+<script>
+const faqs=[
+  {q:"What is Full Stack Development?",a:"Full stack development involves working on both the frontend (client-side) and backend (server-side) of a web application. A full stack developer handles everything from UI design with HTML/CSS/JavaScript to server logic with Node.js and databases like MongoDB."},
+  {q:"What technologies are covered in FSDL?",a:"FSDL covers HTML5, CSS3, JavaScript (ES6+), DOM manipulation, Node.js, Express.js, MongoDB, REST APIs, and modern frontend frameworks. You'll also learn about data visualization using Chart.js."},
+  {q:"How does localStorage work in JavaScript?",a:"localStorage is a Web Storage API that lets you store key-value pairs in the browser with no expiration. Data persists even after the browser is closed. You can use localStorage.setItem('key','value'), getItem('key'), and removeItem('key') to interact with it."},
+  {q:"What is the difference between == and === in JavaScript?",a:"== is loose equality that allows type coercion (e.g., '5' == 5 is true), while === is strict equality that checks both value and type (e.g., '5' === 5 is false). Always prefer === to avoid unexpected bugs in your code."},
+  {q:"What is a REST API?",a:"A REST API (Representational State Transfer) is an architectural style for building web services. It uses standard HTTP methods: GET (fetch data), POST (create data), PUT/PATCH (update data), and DELETE (remove data). Data is typically exchanged in JSON format."},
+  {q:"What is MongoDB and why use it?",a:"MongoDB is a NoSQL document database that stores data in flexible JSON-like documents. It's easy to scale, works naturally with JavaScript, and doesn't require a fixed schema — perfect for dynamic web applications."},
+  {q:"How does event bubbling work in JavaScript?",a:"Event bubbling means that when an event fires on a child element, it propagates (bubbles up) through all its parent elements in the DOM tree. You can stop this with event.stopPropagation(). Understanding bubbling is key to efficient event handling."},
+];
+
+function render(){
+  const wrap=document.getElementById('faqWrap');
+  faqs.forEach((f,i)=>{
+    const item=document.createElement('div');
+    item.className='faq-item';
+    item.innerHTML=`<div class="faq-q" onclick="toggle(${i})"><span>${f.q}</span><span class="icon">+</span></div><div class="faq-a"><p>${f.a}</p></div>`;
+    wrap.appendChild(item);
+  });
+}
+
+function toggle(idx){
+  const items=document.querySelectorAll('.faq-item');
+  const item=items[idx];
+  const isOpen=item.classList.contains('open');
+  // close all
+  items.forEach(it=>{it.classList.remove('open');it.querySelector('.faq-a').classList.remove('open');});
+  if(!isOpen){item.classList.add('open');item.querySelector('.faq-a').classList.add('open');}
+}
+render();
+</script>
+</body>
+</html>

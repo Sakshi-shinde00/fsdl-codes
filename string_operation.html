@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Operations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Sora:wght@400;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0f1117;color:#e2e8f0;font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .app{width:100%;max-width:700px;}
+  h1{font-size:2rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem;}
+  p.sub{color:#64748b;margin-bottom:2rem;font-size:.9rem;}
+  .input-wrap{margin-bottom:2rem;}
+  label{display:block;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.5rem;}
+  textarea{width:100%;background:#1a1d27;border:1.5px solid #2d3148;color:#e2e8f0;font-family:'Fira Code',monospace;font-size:.95rem;padding:1rem;border-radius:12px;resize:vertical;min-height:80px;outline:none;transition:border .2s;}
+  textarea:focus{border-color:#a78bfa;}
+  .ops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem;margin-bottom:2rem;}
+  .op-btn{background:#1a1d27;border:1.5px solid #2d3148;color:#a78bfa;padding:.65rem .8rem;border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:left;}
+  .op-btn:hover{background:#2d2d4e;border-color:#a78bfa;}
+  .op-btn.active{background:#a78bfa15;border-color:#a78bfa;}
+  .results{display:flex;flex-direction:column;gap:.8rem;}
+  .result-card{background:#1a1d27;border:1px solid #2d3148;border-radius:12px;padding:1rem 1.2rem;}
+  .result-label{font-size:.75rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+  .result-val{font-family:'Fira Code',monospace;font-size:.93rem;color:#38bdf8;word-break:break-all;}
+  .result-card.highlight{border-color:#a78bfa;}
+  .result-val.number{color:#f59e0b;font-size:1.4rem;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>&lt; String Operations /&gt;</h1>
+  <p class="sub">Enter a string and apply various operations in real time</p>
+  <div class="input-wrap">
+    <label>Input String</label>
+    <textarea id="strInput" placeholder="Type something here..." oninput="runAll()">Hello World! Welcome to FSDL.</textarea>
+  </div>
+  <div class="results" id="results"></div>
+</div>
+<script>
+function runAll(){
+  const s=document.getElementById('strInput').value;
+  const ops=[
+    {label:"Original String",val:s||'—'},
+    {label:"Length",val:s.length,cls:"number"},
+    {label:"Uppercase",val:s.toUpperCase()},
+    {label:"Lowercase",val:s.toLowerCase()},
+    {label:"Reversed",val:s.split('').reverse().join('')},
+    {label:"Title Case",val:s.replace(/\w\S*/g,t=>t.charAt(0).toUpperCase()+t.substring(1).toLowerCase())},
+    {label:"Trimmed",val:s.trim()},
+    {label:"Word Count",val:s.trim().split(/\s+/).filter(Boolean).length,cls:"number"},
+    {label:"Character Count (no spaces)",val:s.replace(/\s/g,'').length,cls:"number"},
+    {label:"Vowel Count",val:(s.match(/[aeiouAEIOU]/g)||[]).length,cls:"number"},
+    {label:"Consonant Count",val:(s.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g)||[]).length,cls:"number"},
+    {label:"Is Palindrome?",val:s.toLowerCase().replace(/[^a-z0-9]/g,'')===[...s.toLowerCase().replace(/[^a-z0-9]/g,'')].reverse().join('')?'✅ YES':'❌ NO'},
+    {label:"Replace Spaces with Hyphens",val:s.replace(/\s+/g,'-')},
+    {label:"First 10 Characters",val:s.substring(0,10)+(s.length>10?'…':'')},
+    {label:"String Split (by space)",val:JSON.stringify(s.split(' '))},
+  ];
+  const res=document.getElementById('results');
+  res.innerHTML=ops.map(o=>`
+    <div class="result-card${o.cls?' highlight':''}">
+      <div class="result-label">${o.label}</div>
+      <div class="result-val${o.cls?' '+o.cls:''}">${o.val}</div>
+    </div>`).join('');
+}
+runAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:radial-gradient(ellipse at 50% 0%,#1a1a2e,#16213e,#0f3460);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;}
+  .calc{background:#1a1a2e;border-radius:28px;padding:1.5rem;width:320px;box-shadow:0 40px 80px #000a,0 0 0 1px #ffffff10;border:1px solid #ffffff18;}
+  .display{background:#0f0f1a;border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.2rem;text-align:right;}
+  .expr{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:#4a5568;min-height:1.2rem;margin-bottom:.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .result{font-family:'Share Tech Mono',monospace;font-size:2.5rem;color:#e2e8f0;letter-spacing:.02em;word-break:break-all;}
+  .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+  button{padding:1rem;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .15s;active:scale(.95);}
+  .btn-func{background:#2d2d4e;color:#a78bfa;}
+  .btn-func:hover{background:#3d3d6e;}
+  .btn-op{background:#4f46e5;color:#fff;}
+  .btn-op:hover{background:#6366f1;}
+  .btn-num{background:#1e2035;color:#e2e8f0;}
+  .btn-num:hover{background:#2d3055;}
+  .btn-eq{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;grid-column:span 1;}
+  .btn-eq:hover{filter:brightness(1.1);}
+  .btn-zero{grid-column:span 2;}
+  button:active{transform:scale(.93);}
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="display">
+    <div class="expr" id="expr"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-func" onclick="clearAll()">AC</button>
+    <button class="btn-func" onclick="toggleSign()">+/−</button>
+    <button class="btn-func" onclick="percent()">%</button>
+    <button class="btn-op" onclick="setOp('/')">÷</button>
+
+    <button class="btn-num" onclick="input('7')">7</button>
+    <button class="btn-num" onclick="input('8')">8</button>
+    <button class="btn-num" onclick="input('9')">9</button>
+    <button class="btn-op" onclick="setOp('*')">×</button>
+
+    <button class="btn-num" onclick="input('4')">4</button>
+    <button class="btn-num" onclick="input('5')">5</button>
+    <button class="btn-num" onclick="input('6')">6</button>
+    <button class="btn-op" onclick="setOp('-')">−</button>
+
+    <button class="btn-num" onclick="input('1')">1</button>
+    <button class="btn-num" onclick="input('2')">2</button>
+    <button class="btn-num" onclick="input('3')">3</button>
+    <button class="btn-op" onclick="setOp('+')">+</button>
+
+    <button class="btn-num btn-zero" onclick="input('0')">0</button>
+    <button class="btn-num" onclick="inputDot()">.</button>
+    <button class="btn-eq" onclick="calculate()">=</button>
+  </div>
+</div>
+<script>
+let current='0', prev='', operator='', justCalc=false;
+
+function updateDisplay(){
+  document.getElementById('result').textContent=current.length>10?parseFloat(current).toExponential(4):current;
+  document.getElementById('expr').textContent=prev&&operator?prev+' '+opSymbol(operator):'';
+}
+
+function opSymbol(op){return{'+':'+','-':'−','*':'×','/':'÷'}[op]||op;}
+
+function input(d){
+  if(justCalc){current='0';justCalc=false;}
+  if(current==='0'&&d!=='.') current=d;
+  else if(current.length<12) current+=d;
+  updateDisplay();
+}
+
+function inputDot(){
+  if(justCalc){current='0';justCalc=false;}
+  if(!current.includes('.')) current+='.';
+  updateDisplay();
+}
+
+function setOp(op){
+  if(prev&&operator&&!justCalc) calculate(true);
+  prev=current; operator=op; justCalc=true;
+  updateDisplay();
+}
+
+function calculate(intermediate=false){
+  if(!prev||!operator) return;
+  const a=parseFloat(prev),b=parseFloat(current);
+  let res;
+  if(operator=='/'){if(b===0){current='Error';prev='';operator='';updateDisplay();return;}res=a/b;}
+  else if(operator==='*')res=a*b;
+  else if(operator==='-')res=a-b;
+  else res=a+b;
+  if(!intermediate) document.getElementById('expr').textContent=prev+' '+opSymbol(operator)+' '+current+' =';
+  current=parseFloat(res.toFixed(10)).toString();
+  if(!intermediate){prev='';operator='';}
+  justCalc=true;
+  updateDisplay();
+}
+
+function clearAll(){current='0';prev='';operator='';justCalc=false;updateDisplay();}
+function toggleSign(){current=(parseFloat(current)*-1).toString();updateDisplay();}
+function percent(){current=(parseFloat(current)/100).toString();updateDisplay();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key>='0'&&e.key<='9')input(e.key);
+  else if(e.key==='.')inputDot();
+  else if(['+','-','*','/'].includes(e.key))setOp(e.key);
+  else if(e.key==='Enter'||e.key==='=')calculate();
+  else if(e.key==='Backspace'){current=current.slice(0,-1)||'0';updateDisplay();}
+  else if(e.key==='Escape')clearAll();
+});
+updateDisplay();
+</script>
+</body>
+</html>

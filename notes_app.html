@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes App</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#fef3c7;min-height:100vh;font-family:'Quicksand',sans-serif;padding:2rem;}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;max-width:1000px;margin-left:auto;margin-right:auto;}
+  h1{font-size:2rem;font-weight:700;color:#78350f;}
+  h1 span{color:#f59e0b;}
+  .add-form{background:#fff;border-radius:20px;padding:1.5rem;margin-bottom:2rem;max-width:1000px;margin-left:auto;margin-right:auto;box-shadow:0 4px 20px #f59e0b15;}
+  .add-form input{width:100%;padding:.7rem 1rem;border:2px solid #fde68a;border-radius:10px;font-family:'Quicksand',sans-serif;font-size:1rem;font-weight:600;margin-bottom:.7rem;outline:none;color:#1c1917;}
+  .add-form input:focus{border-color:#f59e0b;}
+  .add-form textarea{width:100%;padding:.7rem 1rem;border:2px solid #fde68a;border-radius:10px;font-family:'Quicksand',sans-serif;font-size:.92rem;resize:vertical;min-height:80px;outline:none;color:#1c1917;margin-bottom:.8rem;}
+  .add-form textarea:focus{border-color:#f59e0b;}
+  .form-row{display:flex;gap:.7rem;align-items:center;}
+  .color-opts label{font-size:.8rem;font-weight:600;color:#92400e;margin-right:.4rem;}
+  .color-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s;}
+  .color-dot.sel{border-color:#78350f;}
+  .add-btn{background:#f59e0b;color:#fff;border:none;padding:.6rem 1.5rem;border-radius:10px;font-family:'Quicksand',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;margin-left:auto;}
+  .add-btn:hover{background:#d97706;}
+  .notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;max-width:1000px;margin:0 auto;}
+  .note{border-radius:16px;padding:1.3rem;position:relative;box-shadow:0 4px 14px #0001;transition:transform .2s;}
+  .note:hover{transform:translateY(-3px);}
+  .note-title{font-size:1rem;font-weight:700;margin-bottom:.5rem;color:#1c1917;}
+  .note-body{font-size:.87rem;color:#44403c;line-height:1.6;white-space:pre-wrap;}
+  .note-footer{display:flex;justify-content:space-between;align-items:center;margin-top:.8rem;}
+  .note-date{font-size:.72rem;color:#a8a29e;}
+  .del-btn{background:none;border:none;cursor:pointer;font-size:1rem;opacity:.5;transition:.2s;}
+  .del-btn:hover{opacity:1;}
+  .empty{text-align:center;padding:3rem;color:#d97706;font-size:1rem;max-width:1000px;margin:0 auto;}
+  .search-bar{max-width:1000px;margin:0 auto 1.5rem;display:flex;}
+  .search-bar input{flex:1;padding:.65rem 1rem;border:2px solid #fde68a;border-radius:10px;font-family:'Quicksand',sans-serif;font-size:.9rem;background:#fff;outline:none;}
+  .search-bar input:focus{border-color:#f59e0b;}
+</style>
+</head>
+<body>
+<header><h1>📝 Notes<span>App</span></h1><span style="font-size:.85rem;color:#92400e;font-weight:600;" id="noteCount"></span></header>
+<div class="add-form">
+  <input type="text" id="noteTitle" placeholder="Note title...">
+  <textarea id="noteBody" placeholder="Write your note here..."></textarea>
+  <div class="form-row">
+    <div class="color-opts">
+      <label>Color:</label>
+      <span style="display:inline-flex;gap:.3rem;" id="colorPicker"></span>
+    </div>
+    <button class="add-btn" onclick="addNote()">+ Add Note</button>
+  </div>
+</div>
+<div class="search-bar"><input type="text" id="search" placeholder="🔍 Search notes..." oninput="renderNotes()"></div>
+<div class="notes-grid" id="notesGrid"></div>
+
+<script>
+const colors=['#fef9c3','#d1fae5','#dbeafe','#fce7f3','#ede9fe','#ffedd5'];
+let selColor=colors[0];
+let notes=JSON.parse(localStorage.getItem('fsdl_notes')||'[]');
+
+function buildColorPicker(){
+  const cp=document.getElementById('colorPicker');
+  cp.innerHTML=colors.map(c=>`<span class="color-dot${c===selColor?' sel':''}" style="background:${c}" onclick="selectColor('${c}')"></span>`).join('');
+}
+
+function selectColor(c){
+  selColor=c;
+  buildColorPicker();
+}
+
+function addNote(){
+  const title=document.getElementById('noteTitle').value.trim();
+  const body=document.getElementById('noteBody').value.trim();
+  if(!title&&!body){alert('Please enter a title or note text.');return;}
+  notes.unshift({id:Date.now(),title:title||'Untitled',body,color:selColor,date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})});
+  save();
+  document.getElementById('noteTitle').value='';
+  document.getElementById('noteBody').value='';
+  renderNotes();
+}
+
+function deleteNote(id){
+  if(!confirm('Delete this note?'))return;
+  notes=notes.filter(n=>n.id!==id);
+  save();
+  renderNotes();
+}
+
+function save(){localStorage.setItem('fsdl_notes',JSON.stringify(notes));}
+
+function renderNotes(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const filtered=notes.filter(n=>n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q));
+  document.getElementById('noteCount').textContent=notes.length+' notes saved';
+  const grid=document.getElementById('notesGrid');
+  if(!filtered.length){grid.innerHTML='<div class="empty">No notes found 🌿</div>';return;}
+  grid.innerHTML=filtered.map(n=>`
+    <div class="note" style="background:${n.color}">
+      <div class="note-title">${n.title}</div>
+      <div class="note-body">${n.body}</div>
+      <div class="note-footer"><span class="note-date">${n.date}</span><button class="del-btn" onclick="deleteNote(${n.id})">🗑️</button></div>
+    </div>`).join('');
+}
+
+buildColorPicker();
+renderNotes();
+</script>
+</body>
+</html>

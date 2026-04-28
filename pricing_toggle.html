@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Toggle Interface</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0a0a0f;font-family:'Plus Jakarta Sans',sans-serif;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:3rem 1rem;}
+  h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;}
+  p.sub{color:#64748b;margin-bottom:2.5rem;}
+  .toggle-wrap{display:flex;align-items:center;gap:1rem;margin-bottom:3rem;background:#131320;padding:.5rem 1rem;border-radius:50px;border:1px solid #2d2d4e;}
+  .toggle-label{font-size:.95rem;font-weight:600;color:#64748b;transition:color .3s;}
+  .toggle-label.active{color:#a78bfa;}
+  .toggle{position:relative;width:56px;height:28px;cursor:pointer;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#1e1e3a;border-radius:99px;transition:.3s;}
+  .slider:before{content:'';position:absolute;height:20px;width:20px;left:4px;top:4px;background:#a78bfa;border-radius:50%;transition:.3s;}
+  input:checked + .slider:before{transform:translateX(28px);background:#7c3aed;}
+  .badge{background:#16213e;color:#38bdf8;font-size:.7rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;margin-left:.5rem;}
+  .cards{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;}
+  .card{background:#131320;border:1px solid #2d2d4e;border-radius:20px;padding:2rem;width:260px;position:relative;transition:transform .3s,box-shadow .3s;}
+  .card:hover{transform:translateY(-6px);box-shadow:0 20px 50px #7c3aed20;}
+  .card.popular{border-color:#7c3aed;box-shadow:0 0 30px #7c3aed25;}
+  .pop-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#7c3aed,#a78bfa);color:white;font-size:.7rem;font-weight:700;padding:.3rem 1rem;border-radius:99px;white-space:nowrap;}
+  .plan-name{font-size:.85rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+  .price{font-size:3rem;font-weight:800;color:#fff;line-height:1;}
+  .price sup{font-size:1.4rem;vertical-align:super;}
+  .price sub{font-size:.9rem;color:#64748b;font-weight:400;}
+  .price-yearly{font-size:.8rem;color:#4ade80;margin-top:.3rem;min-height:1.2rem;}
+  .features{list-style:none;margin:1.5rem 0;display:flex;flex-direction:column;gap:.6rem;}
+  .features li{font-size:.88rem;color:#94a3b8;display:flex;align-items:center;gap:.5rem;}
+  .features li::before{content:'✓';color:#4ade80;font-weight:700;}
+  .features li.no::before{content:'✗';color:#f87171;}
+  .features li.no{color:#475569;}
+  .btn{width:100%;padding:.8rem;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+  .btn-outline{background:transparent;border:1.5px solid #2d2d4e;color:#e2e8f0;}
+  .btn-outline:hover{border-color:#7c3aed;color:#a78bfa;}
+  .btn-fill{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;}
+  .btn-fill:hover{opacity:.9;}
+  .price-val{transition:all .3s;}
+</style>
+</head>
+<body>
+<h1>Simple, Transparent Pricing</h1>
+<p class="sub">No hidden fees. Cancel anytime.</p>
+<div class="toggle-wrap">
+  <span class="toggle-label active" id="lbl-monthly">Monthly</span>
+  <label class="toggle"><input type="checkbox" id="billingToggle" onchange="switchPlan()"><span class="slider"></span></label>
+  <span class="toggle-label" id="lbl-yearly">Yearly <span class="badge">Save 20%</span></span>
+</div>
+<div class="cards" id="cards"></div>
+
+<script>
+const plans=[
+  {name:"Starter",monthly:0,yearly:0,features:["1 Project","5GB Storage","Email Support","Basic Analytics"],missing:["Custom Domain","API Access"],btn:"Get Started",style:"outline"},
+  {name:"Pro",monthly:19,yearly:15,features:["10 Projects","50GB Storage","Priority Support","Advanced Analytics","Custom Domain"],missing:["API Access"],popular:true,btn:"Start Free Trial",style:"fill"},
+  {name:"Enterprise",monthly:49,yearly:39,features:["Unlimited Projects","500GB Storage","24/7 Dedicated Support","Full Analytics","Custom Domain","API Access"],missing:[],btn:"Contact Sales",style:"outline"},
+];
+
+let isYearly=false;
+
+function switchPlan(){
+  isYearly=document.getElementById('billingToggle').checked;
+  document.getElementById('lbl-monthly').classList.toggle('active',!isYearly);
+  document.getElementById('lbl-yearly').classList.toggle('active',isYearly);
+  renderCards();
+}
+
+function renderCards(){
+  const cont=document.getElementById('cards');
+  cont.innerHTML='';
+  plans.forEach(p=>{
+    const price=isYearly?p.yearly:p.monthly;
+    const saving=isYearly&&p.monthly>0?`Save $${(p.monthly-p.yearly)*12}/yr`:'';
+    const card=document.createElement('div');
+    card.className='card'+(p.popular?' popular':'');
+    card.innerHTML=`
+      ${p.popular?'<div class="pop-badge">⭐ Most Popular</div>':''}
+      <div class="plan-name">${p.name}</div>
+      <div class="price"><sup>$</sup>${price}<sub>/mo</sub></div>
+      <div class="price-yearly">${saving}</div>
+      <ul class="features">
+        ${p.features.map(f=>`<li>${f}</li>`).join('')}
+        ${p.missing.map(f=>`<li class="no">${f}</li>`).join('')}
+      </ul>
+      <button class="btn btn-${p.style}">${p.btn}</button>`;
+    cont.appendChild(card);
+  });
+}
+
+renderCards();
+</script>
+</body>
+</html>

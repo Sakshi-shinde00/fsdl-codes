@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Gallery</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0d0d0d;font-family:'Raleway',sans-serif;color:#fff;padding:2rem;}
+  h1{text-align:center;font-size:2.5rem;font-weight:800;letter-spacing:.05em;margin-bottom:.5rem;}
+  h1 span{background:linear-gradient(90deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  p.sub{text-align:center;color:#666;margin-bottom:2.5rem;}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;}
+  .photo-item{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:4/3;cursor:pointer;}
+  .photo-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+  .photo-item:hover img{transform:scale(1.12);}
+  .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);opacity:0;transition:opacity .35s;}
+  .photo-item:hover .overlay{opacity:1;}
+  .caption{position:absolute;bottom:0;left:0;right:0;padding:1.2rem;transform:translateY(20px);transition:transform .35s;}
+  .photo-item:hover .caption{transform:translateY(0);}
+  .caption h3{font-size:.95rem;font-weight:700;margin-bottom:.2rem;}
+  .caption p{font-size:.78rem;color:#ccc;}
+  .caption .cat-badge{display:inline-block;background:#f59e0b;color:#000;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;margin-bottom:.4rem;text-transform:uppercase;}
+  /* Lightbox */
+  .lightbox{display:none;position:fixed;inset:0;background:#000c;backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;}
+  .lightbox.show{display:flex;}
+  .lightbox-img{max-width:85vw;max-height:85vh;border-radius:12px;box-shadow:0 0 60px #0008;}
+  .lightbox-close{position:fixed;top:1.5rem;right:1.5rem;font-size:2rem;cursor:pointer;color:#fff;line-height:1;}
+</style>
+</head>
+<body>
+<h1>Photo <span>Gallery</span></h1>
+<p class="sub">Hover to reveal — click to enlarge</p>
+<div class="gallery" id="gallery"></div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">✕</span>
+  <img id="lightboxImg" src="" alt="">
+</div>
+<script>
+const photos=[
+  {src:"https://picsum.photos/seed/mountains/600/450",title:"Mountain Peaks",desc:"The mighty Himalayas at dawn",cat:"Nature"},
+  {src:"https://picsum.photos/seed/ocean/600/450",title:"Ocean Waves",desc:"Blue waters of the Arabian Sea",cat:"Travel"},
+  {src:"https://picsum.photos/seed/citynight/600/450",title:"City at Night",desc:"Mumbai skyline after sunset",cat:"Urban"},
+  {src:"https://picsum.photos/seed/forest/600/450",title:"Green Forest",desc:"Western Ghats in monsoon",cat:"Nature"},
+  {src:"https://picsum.photos/seed/desert/600/450",title:"Golden Desert",desc:"Rajasthan sand dunes",cat:"Travel"},
+  {src:"https://picsum.photos/seed/architecture1/600/450",title:"Architecture",desc:"Modern structures & design",cat:"Art"},
+  {src:"https://picsum.photos/seed/flower/600/450",title:"Wildflowers",desc:"Spring blooms in full color",cat:"Nature"},
+  {src:"https://picsum.photos/seed/bridge/600/450",title:"The Bridge",desc:"Engineering meets beauty",cat:"Urban"},
+];
+
+function build(){
+  const g=document.getElementById('gallery');
+  photos.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='photo-item';
+    div.innerHTML=`<img src="${p.src}" alt="${p.title}" loading="lazy"><div class="overlay"></div><div class="caption"><span class="cat-badge">${p.cat}</span><h3>${p.title}</h3><p>${p.desc}</p></div>`;
+    div.addEventListener('click',()=>openLightbox(p.src));
+    g.appendChild(div);
+  });
+}
+
+function openLightbox(src){
+  document.getElementById('lightboxImg').src=src;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
+build();
+</script>
+</body>
+</html>

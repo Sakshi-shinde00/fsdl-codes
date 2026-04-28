@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Glossary – HTML Tags</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Sora:wght@400;700&display=swap');
+  :root{--bg:#0f1117;--card:#1a1d27;--accent:#00d4ff;--accent2:#7c3aed;--text:#e2e8f0;--muted:#64748b;--border:#2d3148;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh;padding:2rem;}
+  h1{text-align:center;font-size:2.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;}
+  p.sub{text-align:center;color:var(--muted);margin-bottom:2rem;font-size:.95rem;}
+  .search-wrap{display:flex;justify-content:center;margin-bottom:2rem;}
+  #search{width:100%;max-width:500px;padding:.8rem 1.2rem;background:var(--card);border:1.5px solid var(--border);border-radius:50px;color:var(--text);font-family:'Sora',sans-serif;font-size:1rem;outline:none;transition:border .3s;}
+  #search:focus{border-color:var(--accent);}
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 0 30px #00d4ff15;}
+  thead{background:linear-gradient(135deg,#1e2139,#2d1b6e);}
+  th{padding:1rem 1.2rem;text-align:left;color:var(--accent);font-family:'Fira Code',monospace;font-size:.9rem;letter-spacing:.05em;}
+  td{padding:.9rem 1.2rem;border-top:1px solid var(--border);font-size:.92rem;vertical-align:top;}
+  td:first-child{color:#f472b6;font-family:'Fira Code',monospace;font-weight:600;}
+  td:nth-child(2){color:#a3e635;}
+  tr:hover{background:#ffffff08;transition:background .2s;}
+  .badge{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-family:'Fira Code',monospace;}
+  .block{background:#1e3a5f;color:#60a5fa;}
+  .inline{background:#3d1a4f;color:#c084fc;}
+  .empty{background:#3d2a0f;color:#fbbf24;}
+  #noResult{display:none;text-align:center;padding:3rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<h1>⟨ Digital Glossary ⟩</h1>
+<p class="sub">HTML Formatting Tags – Search & Filter in Real-Time</p>
+<div class="search-wrap">
+  <input type="text" id="search" placeholder="🔍  Search tags, descriptions, or type..." oninput="filterTable()">
+</div>
+<table id="glossaryTable">
+  <thead>
+    <tr><th>Tag</th><th>Description</th><th>Example Usage</th><th>Type</th></tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+<p id="noResult">No matching tags found. Try a different search.</p>
+
+<script>
+const tags = [
+  {tag:"&lt;b&gt;",desc:"Bold text without semantic meaning",example:"&lt;b&gt;Bold&lt;/b&gt;",type:"inline"},
+  {tag:"&lt;strong&gt;",desc:"Important (bold) text with semantic importance",example:"&lt;strong&gt;Important&lt;/strong&gt;",type:"inline"},
+  {tag:"&lt;i&gt;",desc:"Italic text for stylistic purposes",example:"&lt;i&gt;Italic&lt;/i&gt;",type:"inline"},
+  {tag:"&lt;em&gt;",desc:"Emphasized text with semantic stress",example:"&lt;em&gt;Emphasis&lt;/em&gt;",type:"inline"},
+  {tag:"&lt;u&gt;",desc:"Underlined text",example:"&lt;u&gt;Underline&lt;/u&gt;",type:"inline"},
+  {tag:"&lt;s&gt;",desc:"Strikethrough – no longer relevant",example:"&lt;s&gt;Old price&lt;/s&gt;",type:"inline"},
+  {tag:"&lt;mark&gt;",desc:"Highlighted text for reference",example:"&lt;mark&gt;Highlight&lt;/mark&gt;",type:"inline"},
+  {tag:"&lt;small&gt;",desc:"Smaller text for fine print",example:"&lt;small&gt;Fine print&lt;/small&gt;",type:"inline"},
+  {tag:"&lt;sub&gt;",desc:"Subscript text below baseline",example:"H&lt;sub&gt;2&lt;/sub&gt;O",type:"inline"},
+  {tag:"&lt;sup&gt;",desc:"Superscript text above baseline",example:"x&lt;sup&gt;2&lt;/sup&gt;",type:"inline"},
+  {tag:"&lt;code&gt;",desc:"Inline code snippet",example:"&lt;code&gt;console.log()&lt;/code&gt;",type:"inline"},
+  {tag:"&lt;pre&gt;",desc:"Preformatted text preserving whitespace",example:"&lt;pre&gt;code block&lt;/pre&gt;",type:"block"},
+  {tag:"&lt;blockquote&gt;",desc:"Quoted section from another source",example:"&lt;blockquote&gt;Quote&lt;/blockquote&gt;",type:"block"},
+  {tag:"&lt;abbr&gt;",desc:"Abbreviation with full form on hover",example:"&lt;abbr title='HyperText'&gt;HTML&lt;/abbr&gt;",type:"inline"},
+  {tag:"&lt;cite&gt;",desc:"Reference to a creative work",example:"&lt;cite&gt;Book Title&lt;/cite&gt;",type:"inline"},
+  {tag:"&lt;del&gt;",desc:"Deleted/removed text",example:"&lt;del&gt;Removed&lt;/del&gt;",type:"inline"},
+  {tag:"&lt;ins&gt;",desc:"Inserted/added text",example:"&lt;ins&gt;Added&lt;/ins&gt;",type:"inline"},
+  {tag:"&lt;hr&gt;",desc:"Horizontal rule – thematic break",example:"&lt;hr&gt;",type:"empty"},
+  {tag:"&lt;br&gt;",desc:"Line break",example:"Line1&lt;br&gt;Line2",type:"empty"},
+  {tag:"&lt;q&gt;",desc:"Short inline quotation with auto quotes",example:"&lt;q&gt;Quote&lt;/q&gt;",type:"inline"},
+];
+
+function buildTable(data){
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML='';
+  data.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.tag}</td><td>${r.desc}</td><td><span style="font-family:'Fira Code',monospace;color:#94a3b8;font-size:.83rem;">${r.example}</span></td><td><span class="badge ${r.type}">${r.type}</span></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('noResult').style.display = data.length===0?'block':'none';
+}
+
+function filterTable(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const filtered=tags.filter(r=>r.tag.toLowerCase().includes(q)||r.desc.toLowerCase().includes(q)||r.type.toLowerCase().includes(q));
+  buildTable(filtered);
+}
+
+buildTable(tags);
+</script>
+</body>
+</html>

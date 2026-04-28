@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly Timetable</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f0f4ff;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --accent: #f59e0b;
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    header p { color: var(--muted); margin-top: 6px; font-size: 1rem; }
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(79,70,229,0.12);
+      background: var(--card);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+    thead tr th {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+    thead tr th:first-child { border-radius: 16px 0 0 0; }
+    thead tr th:last-child  { border-radius: 0 16px 0 0; }
+    tbody tr:nth-child(even) { background: #f8f7ff; }
+    tbody tr:hover { background: #eef2ff; transition: background 0.2s; }
+    td {
+      padding: 13px 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    td.time-col {
+      font-weight: 700;
+      color: var(--primary);
+      background: #ede9fe;
+      white-space: nowrap;
+      font-size: 0.85rem;
+    }
+    td.break-cell {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e;
+      font-weight: 700;
+      font-size: 0.88rem;
+      letter-spacing: 0.5px;
+    }
+    td.lab-cell {
+      background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+      color: #166534;
+      font-weight: 700;
+    }
+    td.math-cell { background: #fce7f3; color: #9d174d; font-weight: 600; }
+    td.cs-cell   { background: #e0f2fe; color: #075985; font-weight: 600; }
+    td.phy-cell  { background: #fff7ed; color: #9a3412; font-weight: 600; }
+    td.eng-cell  { background: #f0fdf4; color: #14532d; font-weight: 600; }
+    td.elec-cell { background: #fdf4ff; color: #6b21a8; font-weight: 600; }
+    .day-label {
+      font-weight: 800;
+      color: var(--primary);
+      background: #eef2ff !important;
+      font-size: 0.95rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .legend-dot {
+      width: 14px; height: 14px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📅 Weekly Class Timetable</h1>
+    <p>Second Year — Computer Engineering | Semester IV</p>
+  </header>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Day / Time</th>
+          <th>9:00 – 10:00</th>
+          <th>10:00 – 11:00</th>
+          <th>11:00 – 12:00</th>
+          <th>12:00 – 1:00</th>
+          <th>1:00 – 2:00</th>
+          <th>2:00 – 4:00</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Monday -->
+        <tr>
+          <td class="time-col day-label">Monday</td>
+          <td class="math-cell">Mathematics</td>
+          <td class="cs-cell">Data Structures</td>
+          <td class="phy-cell">Physics</td>
+          <td class="break-cell" colspan="1">🍱 Lunch Break</td>
+          <td class="eng-cell">Engineering Drawing</td>
+          <td class="lab-cell">🔬 DS Lab</td>
+        </tr>
+        <!-- Tuesday -->
+        <tr>
+          <td class="time-col day-label">Tuesday</td>
+          <td class="cs-cell">DBMS</td>
+          <td class="math-cell">Mathematics</td>
+          <td class="elec-cell">Electronics</td>
+          <td class="break-cell">🍱 Lunch Break</td>
+          <td class="lab-cell" colspan="2">💻 DBMS Lab (2 hrs)</td>
+        </tr>
+        <!-- Wednesday -->
+        <tr>
+          <td class="time-col day-label">Wednesday</td>
+          <td class="eng-cell">Engineering Drawing</td>
+          <td class="cs-cell">Data Structures</td>
+          <td class="math-cell">Mathematics</td>
+          <td class="break-cell">🍱 Lunch Break</td>
+          <td class="phy-cell">Physics</td>
+          <td class="elec-cell">Electronics</td>
+        </tr>
+        <!-- Thursday -->
+        <tr>
+          <td class="time-col day-label">Thursday</td>
+          <td class="cs-cell">DBMS</td>
+          <td class="elec-cell">Electronics</td>
+          <td class="break-cell" colspan="2">🍱 Extended Break / Library</td>
+          <td class="lab-cell" colspan="2">🔬 Electronics Lab (2 hrs)</td>
+        </tr>
+        <!-- Friday -->
+        <tr>
+          <td class="time-col day-label">Friday</td>
+          <td class="math-cell">Mathematics</td>
+          <td class="phy-cell">Physics</td>
+          <td class="cs-cell">Data Structures</td>
+          <td class="break-cell">🍱 Lunch Break</td>
+          <td class="eng-cell">Engineering Drawing</td>
+          <td class="cs-cell">DBMS</td>
+        </tr>
+        <!-- Saturday -->
+        <tr>
+          <td class="time-col day-label">Saturday</td>
+          <td class="lab-cell" colspan="3">💻 Full Stack Dev Lab (3 hrs)</td>
+          <td class="break-cell">🍱 Lunch Break</td>
+          <td class="eng-cell">Seminar / Project</td>
+          <td class="break-cell">— Free —</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#fce7f3"></span>Mathematics</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e0f2fe"></span>CS / DBMS</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fff7ed"></span>Physics</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#f0fdf4"></span>Engineering Drawing</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fdf4ff"></span>Electronics</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#dcfce7"></span>Lab Sessions</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fef3c7"></span>Break</div>
+  </div>
+</body>
+</html>

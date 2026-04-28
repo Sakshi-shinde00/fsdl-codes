@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Department Bar Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --border: #e2e8f4;
+      --text: #1a2035;
+      --muted: #8896b0;
+      --font: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-header .label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 0.5rem;
+    }
+    .page-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+    }
+    .page-header p {
+      margin-top: 0.45rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem 2rem 1.5rem;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    /* ── CARD HEADER ── */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .card-sub   { font-size: 0.78rem; color: var(--muted); font-weight: 400; margin-top: 0.2rem; }
+
+    .stat-chips { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .chip {
+      padding: 0.32rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .chip span { color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+    /* ── CHART AREA ── */
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Y-axis label */
+    .y-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      position: absolute;
+      left: 0; top: 50%;
+      transform: rotate(180deg) translateY(50%);
+    }
+
+    .chart-inner {
+      display: flex;
+      margin-left: 36px;
+    }
+
+    /* Y-axis ticks */
+    .y-axis {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      padding-bottom: 48px;
+      margin-right: 0.75rem;
+      width: 36px;
+      flex-shrink: 0;
+    }
+    .y-tick {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+      text-align: right;
+      line-height: 1;
+    }
+
+    /* Plot area */
+    .plot {
+      flex: 1;
+      position: relative;
+      min-height: 320px;
+    }
+
+    /* Gridlines */
+    .grid {
+      position: absolute;
+      inset: 0;
+      bottom: 48px;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .gridline {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+    }
+    .gridline:first-child { background: transparent; }
+
+    /* Bars container */
+    .bars {
+      position: absolute;
+      inset: 0;
+      bottom: 48px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 0 12px;
+      z-index: 1;
+    }
+
+    /* Bar group */
+    .bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      cursor: pointer;
+    }
+
+    /* Value label above bar */
+    .bar-value {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .bar-group:hover .bar-value,
+    .bar-group.hovered .bar-value { opacity: 1; transform: translateY(0); }
+
+    /* Bar itself */
+    .bar {
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+      height: 0; /* animated from 0 */
+      transition: height 0.9s cubic-bezier(0.22,1,0.36,1), filter 0.2s, transform 0.18s;
+      position: relative;
+      max-width: 64px;
+    }
+    .bar-group:hover .bar {
+      filter: brightness(1.12);
+      transform: scaleX(1.04);
+    }
+
+    /* Shine strip */
+    .bar::after {
+      content: '';
+      position: absolute;
+      top: 6px; left: 6px;
+      width: 30%;
+      height: 40%;
+      background: rgba(255,255,255,0.22);
+      border-radius: 4px;
+    }
+
+    /* X-axis labels */
+    .x-labels {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 48px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px 0;
+    }
+    .x-label {
+      flex: 1;
+      text-align: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      max-width: 64px;
+      margin: 0 auto;
+      line-height: 1.3;
+      transition: color 0.2s;
+      word-break: break-word;
+    }
+    .bar-group:hover .x-label { color: var(--text); }
+
+    /* ── TOOLTIP ── */
+    .tooltip {
+      position: fixed;
+      background: var(--text);
+      color: #fff;
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .tooltip.visible { opacity: 1; }
+    .tooltip .tt-dept { color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-bottom: 2px; }
+    .tooltip .tt-val  { font-size: 0.95rem; font-weight: 700; }
+    .tooltip .tt-pct  { font-size: 0.7rem; color: rgba(255,255,255,0.55); margin-top: 1px; }
+
+    /* ── LEGEND ── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem 1.2rem;
+      margin-top: 1.5rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.18s;
+    }
+    .legend-item:hover { color: var(--text); }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── SUMMARY CARDS ── */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 900px;
+      margin-top: 1.5rem;
+    }
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .summary-card .sc-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .summary-card .sc-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .summary-card .sc-sub {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+    .summary-card .sc-bar {
+      height: 3px;
+      border-radius: 3px;
+      margin-top: 0.75rem;
+      width: 100%;
+    }
+
+    /* ── VIEW TOGGLE ── */
+    .toggle-wrap {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .tog-btn {
+      padding: 0.3rem 0.75rem;
+      border: none;
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      color: var(--muted);
+      transition: all 0.18s;
+    }
+    .tog-btn.active { background: #fff; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* Table view */
+    .table-view {
+      display: none;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    .table-view th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-view td {
+      padding: 0.65rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-view tr:last-child td { border-bottom: none; }
+    .table-view .td-bar {
+      height: 6px;
+      border-radius: 6px;
+    }
+    .table-view tr:hover td { background: var(--bg); }
+
+    @media (max-width: 600px) {
+      .card { padding: 1.25rem 1rem 1rem; }
+      .bars { gap: 5px; padding: 0 4px; }
+      .x-label { font-size: 0.58rem; }
+      .bar { max-width: 44px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="label">📊 Data Visualization</div>
+  <h1>Student Enrollment by Department</h1>
+  <p>Academic Year 2024–25 · Engineering College</p>
+</div>
+
+<!-- Main chart card -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Department-wise Student Count</div>
+      <div class="card-sub">Hover over bars for details</div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+      <div class="stat-chips">
+        <div class="chip">Total <span id="totalChip">0</span></div>
+        <div class="chip">Avg <span id="avgChip">0</span></div>
+      </div>
+      <div class="toggle-wrap">
+        <button class="tog-btn active" onclick="setView('chart',this)">Chart</button>
+        <button class="tog-btn" onclick="setView('table',this)">Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div id="chartView">
+    <div class="chart-wrap">
+      <div class="chart-inner">
+        <div class="y-axis" id="yAxis"></div>
+        <div class="plot" id="plot">
+          <div class="grid" id="grid"></div>
+          <div class="bars" id="bars"></div>
+          <div class="x-labels" id="xLabels"></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- Table -->
+  <table class="table-view" id="tableView">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Department</th>
+        <th>Students</th>
+        <th>Share</th>
+        <th style="width:180px">Distribution</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<!-- Summary cards -->
+<div class="summary" id="summary"></div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tt-dept" id="ttDept"></div>
+  <div class="tt-val"  id="ttVal"></div>
+  <div class="tt-pct"  id="ttPct"></div>
+</div>
+
+<script>
+  // ── Static data ──
+  const data = [
+    { dept: "Computer\nScience",  short:"CSE",  students: 420, color: "#6366f1" },
+    { dept: "Mechanical\nEngg",   short:"MECH", students: 310, color: "#f59e0b" },
+    { dept: "Electronics",        short:"ECE",  students: 380, color: "#10b981" },
+    { dept: "Civil\nEngg",        short:"CIVIL",students: 260, color: "#f472b6" },
+    { dept: "Information\nTech",  short:"IT",   students: 395, color: "#3b82f6" },
+    { dept: "Chemical\nEngg",     short:"CHEM", students: 185, color: "#f97316" },
+    { dept: "Biotechnology",      short:"BIO",  students: 145, color: "#a78bfa" },
+    { dept: "MBA",                short:"MBA",  students: 220, color: "#ef4444" },
+  ];
+
+  const total   = data.reduce((s, d) => s + d.students, 0);
+  const maxVal  = Math.max(...data.map(d => d.students));
+  const minVal  = Math.min(...data.map(d => d.students));
+  const avgVal  = Math.round(total / data.length);
+
+  // ── Y-axis config ──
+  const Y_STEPS  = 5;
+  const Y_MAX    = Math.ceil(maxVal / 100) * 100;
+  const PLOT_H   = 320; // px (matches min-height)
+
+  // ── Populate chips ──
+  document.getElementById('totalChip').textContent = total.toLocaleString();
+  document.getElementById('avgChip').textContent   = avgVal.toLocaleString();
+
+  // ── Y-axis ticks & gridlines ──
+  const yAxis = document.getElementById('yAxis');
+  const grid  = document.getElementById('grid');
+  for (let i = 0; i <= Y_STEPS; i++) {
+    const val = Math.round(Y_MAX * i / Y_STEPS);
+    const tick = document.createElement('div');
+    tick.className = 'y-tick';
+    tick.textContent = val >= 1000 ? (val/1000).toFixed(1)+'k' : val;
+    yAxis.appendChild(tick);
+
+    const gl = document.createElement('div');
+    gl.className = 'gridline';
+    grid.appendChild(gl);
+  }
+
+  // ── Render bars ──
+  const barsEl   = document.getElementById('bars');
+  const xLabels  = document.getElementById('xLabels');
+  const legend   = document.getElementById('legend');
+  const tooltip  = document.getElementById('tooltip');
+
+  data.forEach((d, i) => {
+    const pct    = (d.students / Y_MAX) * 100;
+    const share  = ((d.students / total) * 100).toFixed(1);
+
+    // Bar group
+    const grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.innerHTML = `
+      <div class="bar-value">${d.students}</div>
+      <div class="bar" style="background:linear-gradient(180deg, ${d.color}dd 0%, ${d.color} 100%)"></div>
+    `;
+
+    // Tooltip events
+    grp.addEventListener('mouseenter', e => {
+      document.getElementById('ttDept').textContent = d.dept.replace('\n', ' ');
+      document.getElementById('ttVal').textContent  = `${d.students.toLocaleString()} students`;
+      document.getElementById('ttPct').textContent  = `${share}% of total`;
+      tooltip.classList.add('visible');
+      grp.classList.add('hovered');
+    });
+    grp.addEventListener('mousemove', e => {
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 48) + 'px';
+    });
+    grp.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('visible');
+      grp.classList.remove('hovered');
+    });
+
+    barsEl.appendChild(grp);
+
+    // X-label
+    const xl = document.createElement('div');
+    xl.className = 'x-label';
+    xl.textContent = d.short;
+    xLabels.appendChild(xl);
+
+    // Legend
+    const li = document.createElement('div');
+    li.className = 'legend-item';
+    li.innerHTML = `<div class="legend-dot" style="background:${d.color}"></div>${d.dept.replace('\n',' ')}`;
+    legend.appendChild(li);
+
+    // Animate bar after paint
+    setTimeout(() => {
+      grp.querySelector('.bar').style.height = `${pct}%`;
+    }, 80 + i * 70);
+  });
+
+  // ── Summary cards ──
+  const maxD = data.reduce((a,b) => a.students > b.students ? a : b);
+  const minD = data.reduce((a,b) => a.students < b.students ? a : b);
+  const summaryData = [
+    { label:'Total Students', value: total.toLocaleString(), sub:'Across all departments', color:'#6366f1', fill:100 },
+    { label:'Highest Enrolled', value: maxD.students.toLocaleString(), sub: maxD.dept.replace('\n',' '), color: maxD.color, fill: 100 },
+    { label:'Lowest Enrolled', value: minD.students.toLocaleString(), sub: minD.dept.replace('\n',' '), color: minD.color, fill: Math.round(minD.students/maxD.students*100) },
+    { label:'Average / Dept', value: avgVal.toLocaleString(), sub:'Mean enrollment', color:'#10b981', fill: Math.round(avgVal/maxD.students*100) },
+  ];
+  const summaryEl = document.getElementById('summary');
+  summaryData.forEach(s => {
+    const c = document.createElement('div');
+    c.className = 'summary-card';
+    c.innerHTML = `
+      <div class="sc-label">${s.label}</div>
+      <div class="sc-value">${s.value}</div>
+      <div class="sc-sub">${s.sub}</div>
+      <div class="sc-bar" style="background:linear-gradient(90deg,${s.color} ${s.fill}%,var(--border) ${s.fill}%)"></div>
+    `;
+    summaryEl.appendChild(c);
+  });
+
+  // ── Table view ──
+  const tableBody = document.getElementById('tableBody');
+  const sorted = [...data].sort((a,b) => b.students - a.students);
+  sorted.forEach((d, i) => {
+    const share = ((d.students / total) * 100).toFixed(1);
+    const pct   = Math.round(d.students / maxVal * 100);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-weight:600">${i+1}</td>
+      <td>
+        <span style="display:inline-flex;align-items:center;gap:0.5rem">
+          <span style="width:10px;height:10px;border-radius:3px;background:${d.color};display:inline-block"></span>
+          ${d.dept.replace('\n',' ')}
+        </span>
+      </td>
+      <td><strong>${d.students.toLocaleString()}</strong></td>
+      <td style="color:var(--muted)">${share}%</td>
+      <td><div class="td-bar" style="width:${pct}%;background:${d.color}cc"></div></td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  // ── View toggle ──
+  function setView(view, btn) {
+    document.querySelectorAll('.tog-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('chartView').style.display  = view === 'chart' ? 'block' : 'none';
+    document.getElementById('tableView').style.display  = view === 'table' ? 'table' : 'none';
+  }
+</script>
+</body>
+</html>

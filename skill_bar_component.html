@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Bar Component</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+  :root{--bg:#f8fafc;--card:#ffffff;--accent:#6366f1;--text:#1e293b;--muted:#94a3b8;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(135deg,#e0e7ff 0%,#f0fdf4 100%);min-height:100vh;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .container{background:white;border-radius:24px;padding:2.5rem;width:100%;max-width:600px;box-shadow:0 20px 60px #6366f120;}
+  h1{font-size:1.8rem;font-weight:700;color:var(--text);margin-bottom:.3rem;}
+  h1 span{color:var(--accent);}
+  p.sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem;}
+  .form-row{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+  input{flex:1;padding:.7rem 1rem;border:2px solid #e2e8f0;border-radius:12px;font-family:'Outfit',sans-serif;font-size:.95rem;outline:none;transition:border .2s;min-width:140px;}
+  input:focus{border-color:var(--accent);}
+  input[type=number]{max-width:130px;}
+  button{padding:.7rem 1.5rem;background:var(--accent);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  button:hover{transform:translateY(-2px);box-shadow:0 8px 20px #6366f140;}
+  .skills-list{display:flex;flex-direction:column;gap:1.2rem;}
+  .skill-item{background:#f8fafc;border-radius:14px;padding:1.2rem 1.4rem;}
+  .skill-header{display:flex;justify-content:space-between;margin-bottom:.7rem;}
+  .skill-name{font-weight:600;color:var(--text);font-size:.95rem;}
+  .skill-pct{font-weight:700;color:var(--accent);font-size:.95rem;}
+  .bar-track{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:99px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899);}
+  .empty-msg{text-align:center;color:var(--muted);padding:2rem 0;font-size:.95rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Skill <span>Bar</span> Component</h1>
+  <p class="sub">Add a skill name and proficiency level to visualize it.</p>
+  <div class="form-row">
+    <input type="text" id="skillName" placeholder="e.g. JavaScript" />
+    <input type="number" id="skillPct" placeholder="%" min="0" max="100" />
+    <button onclick="addSkill()">+ Add</button>
+  </div>
+  <div class="skills-list" id="skillsList">
+    <div class="empty-msg" id="emptyMsg">No skills added yet. Start adding above!</div>
+  </div>
+</div>
+<script>
+const defaults=[{name:"HTML & CSS",pct:90},{name:"JavaScript",pct:78},{name:"React.js",pct:65},{name:"Node.js",pct:55},{name:"MongoDB",pct:48}];
+let skills=[...defaults];
+
+function render(){
+  const list=document.getElementById('skillsList');
+  document.getElementById('emptyMsg').style.display=skills.length?'none':'block';
+  const existing=list.querySelectorAll('.skill-item');
+  existing.forEach(e=>e.remove());
+  skills.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='skill-item';
+    div.innerHTML=`<div class="skill-header"><span class="skill-name">${s.name}</span><span class="skill-pct">${s.pct}%</span></div><div class="bar-track"><div class="bar-fill" id="bar${i}"></div></div>`;
+    list.appendChild(div);
+    setTimeout(()=>{document.getElementById('bar'+i).style.width=s.pct+'%';},50);
+  });
+}
+
+function addSkill(){
+  const name=document.getElementById('skillName').value.trim();
+  const pct=parseInt(document.getElementById('skillPct').value);
+  if(!name||isNaN(pct)||pct<0||pct>100){alert('Enter valid skill name and percentage (0–100)');return;}
+  skills.push({name,pct});
+  document.getElementById('skillName').value='';
+  document.getElementById('skillPct').value='';
+  render();
+}
+
+document.getElementById('skillName').addEventListener('keydown',e=>{if(e.key==='Enter')addSkill();});
+render();
+</script>
+</body>
+</html>

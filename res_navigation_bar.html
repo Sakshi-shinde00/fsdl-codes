@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsive Navigation Bar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#f8fafc;}
+  nav{background:#fff;box-shadow:0 2px 20px #0001;position:sticky;top:0;z-index:100;}
+  .nav-inner{max-width:1100px;margin:0 auto;padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+  .logo{font-size:1.3rem;font-weight:700;color:#111;text-decoration:none;}
+  .logo span{color:#6366f1;}
+  .nav-links{display:flex;align-items:center;gap:1.5rem;list-style:none;}
+  .nav-links a{text-decoration:none;color:#374151;font-size:.92rem;font-weight:500;transition:color .2s;}
+  .nav-links a:hover{color:#6366f1;}
+  /* Dropdown */
+  .dropdown{position:relative;}
+  .dropdown > a{display:flex;align-items:center;gap:.3rem;}
+  .dropdown > a::after{content:'▾';font-size:.7rem;}
+  .dropdown-menu{display:none;position:absolute;top:calc(100% + .8rem);left:0;background:#fff;border-radius:12px;box-shadow:0 8px 30px #0002;min-width:200px;overflow:hidden;border:1px solid #e5e7eb;}
+  .dropdown:hover .dropdown-menu{display:block;}
+  .dropdown-menu a{display:block;padding:.7rem 1.1rem;font-size:.88rem;color:#374151;transition:background .15s;}
+  .dropdown-menu a:hover{background:#f5f3ff;color:#6366f1;}
+  .dropdown-menu a span{margin-right:.5rem;}
+  .nav-cta{background:#6366f1;color:#fff !important;padding:.45rem 1rem;border-radius:8px;}
+  .nav-cta:hover{background:#4f46e5;color:#fff !important;}
+  /* Hamburger */
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.3rem;}
+  .hamburger span{display:block;width:24px;height:2.5px;background:#111;border-radius:3px;transition:.3s;}
+  .hamburger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+  .hamburger.open span:nth-child(2){opacity:0;}
+  .hamburger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+  @media(max-width:768px){
+    .nav-links{display:none;flex-direction:column;align-items:flex-start;position:absolute;top:60px;left:0;right:0;background:#fff;padding:1rem 1.5rem;box-shadow:0 8px 20px #0001;gap:.3rem;}
+    .nav-links.open{display:flex;}
+    .nav-links li{width:100%;}
+    .nav-links a{padding:.6rem 0;display:block;}
+    .dropdown-menu{position:static;box-shadow:none;border:none;background:#f8fafc;border-radius:8px;padding:.3rem .5rem;margin-top:.3rem;}
+    .hamburger{display:flex;}
+  }
+  /* Demo content */
+  .hero{max-width:1100px;margin:5rem auto;padding:0 1.5rem;text-align:center;}
+  .hero h1{font-size:3rem;font-weight:700;color:#111;margin-bottom:1rem;}
+  .hero p{color:#6b7280;font-size:1.1rem;max-width:600px;margin:0 auto;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#">Dev<span>Studio</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li class="dropdown">
+        <a href="#">Services</a>
+        <div class="dropdown-menu">
+          <a href="#"><span>🎨</span>UI/UX Design</a>
+          <a href="#"><span>💻</span>Web Development</a>
+          <a href="#"><span>📱</span>Mobile Apps</a>
+          <a href="#"><span>☁️</span>Cloud Hosting</a>
+          <a href="#"><span>🔒</span>Cybersecurity</a>
+        </div>
+      </li>
+      <li class="dropdown">
+        <a href="#">Products</a>
+        <div class="dropdown-menu">
+          <a href="#"><span>🛠️</span>Dev Tools</a>
+          <a href="#"><span>📊</span>Analytics</a>
+          <a href="#"><span>🤖</span>AI Suite</a>
+        </div>
+      </li>
+      <li><a href="#">Blog</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#" class="nav-cta">Get Started</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+<div class="hero">
+  <h1>Responsive Navigation</h1>
+  <p>A fully responsive navbar with dropdown menus. Resize the window to see the hamburger menu in action!</p>
+</div>
+<script>
+function toggleMenu(){
+  document.getElementById('navLinks').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Registration Form</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:linear-gradient(135deg,#e0f2fe 0%,#ede9fe 100%);min-height:100vh;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .form-card{background:#fff;border-radius:24px;padding:2.5rem;width:100%;max-width:600px;box-shadow:0 20px 60px #0002;}
+  .form-header{text-align:center;margin-bottom:2rem;}
+  .form-header .icon{font-size:2.5rem;margin-bottom:.5rem;}
+  h1{font-size:1.6rem;font-weight:700;color:#1e293b;}
+  p.sub{font-size:.85rem;color:#94a3b8;margin-top:.3rem;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:540px){.grid-2{grid-template-columns:1fr;}}
+  .field{margin-bottom:1.2rem;}
+  label{display:block;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:.4rem;}
+  label span{color:#ef4444;}
+  input,select,textarea{width:100%;padding:.7rem .95rem;border:2px solid #e2e8f0;border-radius:10px;font-family:'Inter',sans-serif;font-size:.92rem;color:#1e293b;outline:none;transition:border .2s,box-shadow .2s;background:#f8fafc;}
+  input:focus,select:focus,textarea:focus{border-color:#6366f1;box-shadow:0 0 0 3px #6366f115;background:#fff;}
+  input.error,select.error{border-color:#ef4444;}
+  .error-msg{font-size:.75rem;color:#ef4444;margin-top:.25rem;display:none;}
+  .error-msg.show{display:block;}
+  /* Gender radio */
+  .radio-group{display:flex;gap:1.2rem;flex-wrap:wrap;}
+  .radio-label{display:flex;align-items:center;gap:.4rem;font-size:.9rem;font-weight:500;color:#374151;cursor:pointer;}
+  .radio-label input[type=radio]{width:auto;accent-color:#6366f1;}
+  /* Submit */
+  .submit-btn{width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;padding:.9rem;border-radius:12px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;margin-top.5rem;transition:opacity .2s;}
+  .submit-btn:hover{opacity:.9;}
+  .success-box{display:none;text-align:center;padding:2rem;background:#f0fdf4;border-radius:16px;border:2px solid #bbf7d0;margin-top:1rem;}
+  .success-box h2{color:#16a34a;font-size:1.2rem;margin-bottom:.5rem;}
+  .success-box p{color:#4b5563;font-size:.9rem;}
+  .divider{display:flex;align-items:center;gap:.8rem;margin:1.5rem 0;color:#cbd5e1;font-size:.8rem;}
+  .divider hr{flex:1;border:none;border-top:1px solid #e2e8f0;}
+</style>
+</head>
+<body>
+<div class="form-card">
+  <div class="form-header">
+    <div class="icon">🎓</div>
+    <h1>Student Registration</h1>
+    <p class="sub">Fill all required fields to complete registration</p>
+  </div>
+  <form id="regForm" novalidate>
+    <div class="grid-2">
+      <div class="field">
+        <label>First Name <span>*</span></label>
+        <input type="text" id="fname" placeholder="Rohan">
+        <div class="error-msg" id="err-fname">First name is required.</div>
+      </div>
+      <div class="field">
+        <label>Last Name <span>*</span></label>
+        <input type="text" id="lname" placeholder="Sharma">
+        <div class="error-msg" id="err-lname">Last name is required.</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Email Address <span>*</span></label>
+      <input type="email" id="email" placeholder="rohan@example.com">
+      <div class="error-msg" id="err-email">Enter a valid email address.</div>
+    </div>
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="phone" placeholder="+91 98765 43210" maxlength="15">
+    </div>
+    <div class="field">
+      <label>Gender <span>*</span></label>
+      <div class="radio-group">
+        <label class="radio-label"><input type="radio" name="gender" value="Male"> Male</label>
+        <label class="radio-label"><input type="radio" name="gender" value="Female"> Female</label>
+        <label class="radio-label"><input type="radio" name="gender" value="Other"> Other</label>
+      </div>
+      <div class="error-msg" id="err-gender">Please select gender.</div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Course <span>*</span></label>
+        <select id="course">
+          <option value="">-- Select Course --</option>
+          <option>B.Tech – Computer Science</option>
+          <option>B.Tech – IT</option>
+          <option>B.Tech – Electronics</option>
+          <option>BCA</option>
+          <option>MCA</option>
+          <option>M.Tech</option>
+        </select>
+        <div class="error-msg" id="err-course">Please select a course.</div>
+      </div>
+      <div class="field">
+        <label>Year of Study</label>
+        <select id="year">
+          <option value="">-- Year --</option>
+          <option>1st Year</option>
+          <option>2nd Year</option>
+          <option>3rd Year</option>
+          <option>4th Year</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Address <span>*</span></label>
+      <textarea id="address" placeholder="Flat No, Street, City, State – PIN" rows="3"></textarea>
+      <div class="error-msg" id="err-address">Address is required.</div>
+    </div>
+    <button type="button" class="submit-btn" onclick="submitForm()">Submit Registration →</button>
+  </form>
+  <div class="success-box" id="successBox">
+    <h2>✅ Registration Successful!</h2>
+    <p id="successMsg"></p>
+  </div>
+</div>
+<script>
+function validate(id,condition,errId){
+  const el=document.getElementById(id);
+  const err=document.getElementById(errId);
+  if(!condition){el.classList.add('error');err.classList.add('show');return false;}
+  el.classList.remove('error');err.classList.remove('show');return true;
+}
+
+function submitForm(){
+  const fname=document.getElementById('fname').value.trim();
+  const lname=document.getElementById('lname').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const gender=document.querySelector('input[name=gender]:checked');
+  const course=document.getElementById('course').value;
+  const address=document.getElementById('address').value.trim();
+
+  let valid=true;
+  valid=validate('fname',fname,'err-fname')&&valid;
+  valid=validate('lname',lname,'err-lname')&&valid;
+  valid=validate('email',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'err-email')&&valid;
+  if(!gender){document.getElementById('err-gender').classList.add('show');valid=false;}
+  else document.getElementById('err-gender').classList.remove('show');
+  valid=validate('course',course,'err-course')&&valid;
+  valid=validate('address',address,'err-address')&&valid;
+
+  if(valid){
+    document.getElementById('successMsg').textContent=`Welcome, ${fname} ${lname}! Your registration for ${course} has been received.`;
+    document.getElementById('successBox').style.display='block';
+    document.getElementById('regForm').style.display='none';
+  }
+}
+</script>
+</body>
+</html>
